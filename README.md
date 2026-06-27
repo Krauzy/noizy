@@ -1,6 +1,8 @@
 # Noizy
 
-Noizy is a fullstack music streaming platform inspired by common streaming workflows without using protected brands, names, or assets. The visual identity uses a dark UI with a yellow primary theme.
+Noizy is a fullstack music streaming platform inspired by common streaming workflows without using protected brands, names, or assets.
+
+<img width="1392" height="952" alt="image" src="https://github.com/user-attachments/assets/3b0c9c61-fa64-4e12-9960-bf1b29e74a59" />
 
 ## Stack
 
