@@ -1,0 +1,53 @@
+<div class="page">
+  <section class="hero">
+    <div>
+      <p>Noizy</p>
+      <h1>Music streaming with a bright yellow pulse.</h1>
+      <span>Browse the catalog, stream uploaded tracks, and build playlists from one workspace.</span>
+    </div>
+  </section>
+
+  @if (loading) {
+    <app-loading-spinner></app-loading-spinner>
+  } @else {
+    <section>
+      <div class="section-title"><h2>Recommended tracks</h2></div>
+      @if (tracks.length) {
+        <div class="grid">
+          @for (track of tracks; track track.id) {
+            <app-music-card [track]="track" (play)="play($event)"></app-music-card>
+          }
+        </div>
+      } @else {
+        <app-empty-state title="No tracks found" description="Upload a track to start the catalog."></app-empty-state>
+      }
+    </section>
+
+    <section>
+      <div class="section-title"><h2>Public playlists</h2></div>
+      <div class="grid">
+        @for (playlist of playlists; track playlist.id) {
+          <app-playlist-card [playlist]="playlist"></app-playlist-card>
+        }
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><h2>Albums</h2></div>
+      <div class="grid">
+        @for (album of albums; track album.id) {
+          <app-album-card [album]="album"></app-album-card>
+        }
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><h2>Artists</h2></div>
+      <div class="grid">
+        @for (artist of artists; track artist.id) {
+          <app-artist-card [artist]="artist"></app-artist-card>
+        }
+      </div>
+    </section>
+  }
+</div>

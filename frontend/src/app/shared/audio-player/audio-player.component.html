@@ -1,0 +1,71 @@
+@if (track$ | async; as track) {
+<footer class="player" aria-label="Music player">
+  <section class="track-summary" aria-label="Now playing">
+    <span class="art" aria-hidden="true">
+      <span></span>
+    </span>
+    <span class="track-meta">
+      <strong>{{ track.title }}</strong>
+      <span>{{ track.artist.name }}</span>
+    </span>
+    <button type="button" class="icon-button subtle" aria-label="Add to playlist" title="Add to playlist">
+      <fa-icon [icon]="icons.add" aria-hidden="true"></fa-icon>
+    </button>
+  </section>
+
+  <section class="transport" aria-label="Playback controls">
+    <div class="control-row">
+      <button type="button" class="icon-button mode-icon" [class.active]="shuffle$ | async" [attr.aria-pressed]="(shuffle$ | async) ? 'true' : 'false'" aria-label="Random" title="Random" (click)="player.toggleShuffle()">
+        <fa-icon [icon]="icons.shuffle" aria-hidden="true"></fa-icon>
+      </button>
+      <button type="button" class="icon-button" aria-label="Previous track" title="Previous track" (click)="player.previous()">
+        <fa-icon [icon]="icons.previous" aria-hidden="true"></fa-icon>
+      </button>
+      <button type="button" class="primary" [attr.aria-label]="(playing$ | async) ? 'Pause track' : 'Play track'" [attr.title]="(playing$ | async) ? 'Pause track' : 'Play track'" (click)="player.toggle()">
+        @if (playing$ | async) {
+          <fa-icon [icon]="icons.pause" aria-hidden="true"></fa-icon>
+        } @else {
+          <fa-icon [icon]="icons.play" aria-hidden="true"></fa-icon>
+        }
+      </button>
+      <button type="button" class="icon-button" aria-label="Next track" title="Next track" (click)="player.next()">
+        <fa-icon [icon]="icons.next" aria-hidden="true"></fa-icon>
+      </button>
+      @if (loopMode$ | async; as loopMode) {
+        <button type="button" class="icon-button mode-icon loop-toggle" [class.active]="loopMode !== 'off'" [class.track-loop]="loopMode === 'track'" [class.queue-loop]="loopMode === 'queue'" [attr.aria-pressed]="loopMode !== 'off' ? 'true' : 'false'" [attr.aria-label]="loopLabel(loopMode)" [attr.title]="loopLabel(loopMode)" (click)="player.cycleLoopMode()">
+          <fa-icon [icon]="icons.repeat" aria-hidden="true"></fa-icon>
+          <span class="loop-state" aria-hidden="true"></span>
+        </button>
+      }
+    </div>
+
+    <div class="progress-row">
+      <span>{{ formatTime(currentTime$ | async) }}</span>
+      <input type="range" min="0" max="100" [value]="progress$ | async" (input)="seek($event)" aria-label="Progress">
+      <span>{{ formatTime(duration$ | async) }}</span>
+    </div>
+  </section>
+
+  <section class="player-actions" aria-label="Player options">
+    <button type="button" class="icon-button utility" aria-label="Lyrics" title="Lyrics">
+      <fa-icon [icon]="icons.lyrics" aria-hidden="true"></fa-icon>
+    </button>
+    <button type="button" class="icon-button utility" aria-label="Queue" title="Queue">
+      <fa-icon [icon]="icons.queue" aria-hidden="true"></fa-icon>
+    </button>
+    <button type="button" class="icon-button utility" aria-label="Device" title="Device">
+      <fa-icon [icon]="icons.device" aria-hidden="true"></fa-icon>
+    </button>
+    <label class="volume" title="Volume">
+      <fa-icon [icon]="icons.volume" aria-hidden="true"></fa-icon>
+      <input type="range" min="0" max="1" step="0.01" [value]="volume$ | async" (input)="setVolume($event)" aria-label="Volume">
+    </label>
+    <button type="button" class="icon-button utility wide-only" aria-label="Mini player" title="Mini player">
+      <fa-icon [icon]="icons.device" aria-hidden="true"></fa-icon>
+    </button>
+    <button type="button" class="icon-button utility wide-only" aria-label="Full screen" title="Full screen">
+      <fa-icon [icon]="icons.expand" aria-hidden="true"></fa-icon>
+    </button>
+  </section>
+</footer>
+}

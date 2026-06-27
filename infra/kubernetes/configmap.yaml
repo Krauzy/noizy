@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: noizy-config
+  namespace: noizy
+data:
+  SERVER_PORT: "8080"
+  FRONTEND_ORIGIN: "https://noizy.example.com"
+  AWS_REGION: "us-east-1"
+  S3_TRACKS_BUCKET: "noizy-prod-tracks"
+  S3_IMAGES_BUCKET: "noizy-prod-images"
+  SQS_TRACK_EVENTS_QUEUE_URL: "https://sqs.us-east-1.amazonaws.com/123456789012/noizy-prod-track-events"
+  SNS_TRACK_EVENTS_TOPIC_ARN: "arn:aws:sns:us-east-1:123456789012:noizy-prod-track-events"
+  REDIS_HOST: "noizy-redis.example.cache.amazonaws.com"
+  REDIS_PORT: "6379"

@@ -1,0 +1,26 @@
+<div class="page">
+  @if (artist) {
+    <section class="artist-hero">
+      <span>{{ artist.name.charAt(0) }}</span>
+      <div>
+        <p>Artist</p>
+        <h1>{{ artist.name }}</h1>
+        <small>{{ artist.description }}</small>
+      </div>
+    </section>
+  }
+
+  <section>
+    <div class="section-title"><h2>Tracks</h2></div>
+    <app-track-list [tracks]="tracks" (play)="play($event)"></app-track-list>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>Albums</h2></div>
+    <div class="grid">
+      @for (album of albums; track album.id) {
+        <app-album-card [album]="album"></app-album-card>
+      }
+    </div>
+  </section>
+</div>

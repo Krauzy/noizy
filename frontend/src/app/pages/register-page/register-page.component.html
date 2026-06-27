@@ -1,0 +1,14 @@
+<section class="auth panel">
+  <div>
+    <h1>Register</h1>
+    <p class="muted">Create a listener account for playlists, likes, and upload access.</p>
+  </div>
+  <form class="form" [formGroup]="form" (ngSubmit)="submit()">
+    <label>Name<input type="text" formControlName="name"></label>
+    <label>Email<input type="email" formControlName="email"></label>
+    <label>Password<input type="password" formControlName="password"></label>
+    @if (error) { <p class="error">{{ error }}</p> }
+    <button class="button" type="submit">Create account</button>
+  </form>
+  <p class="muted">Already registered? <a routerLink="/login">Login</a>.</p>
+</section>

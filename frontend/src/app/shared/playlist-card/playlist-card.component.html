@@ -1,0 +1,7 @@
+<a class="playlist-card" [routerLink]="['/playlists', playlist.id]">
+  <span class="cover" aria-hidden="true">
+    <span></span>
+  </span>
+  <h3>{{ playlist.name }}</h3>
+  <p>{{ playlist.tracks.length }} tracks - {{ playlist.isPublic ? 'Public' : 'Private' }}</p>
+</a>

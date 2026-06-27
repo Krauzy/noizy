@@ -1,0 +1,92 @@
+.track-list {
+  display: grid;
+  gap: 6px;
+}
+
+article {
+  display: grid;
+  grid-template-columns: 34px 38px minmax(0, 1fr) minmax(90px, 0.35fr) 70px 38px;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: #a3a3a3;
+  border: 1px solid transparent;
+  transition: transform 180ms ease, background 180ms ease, color 180ms ease, border-color 180ms ease;
+}
+
+article:hover {
+  background: #242424;
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  transform: translateX(4px);
+}
+
+article:focus-within {
+  border-color: rgba(250, 204, 21, 0.46);
+  background: #242424;
+}
+
+.play,
+.like {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #2f2f2f;
+  color: #ffffff;
+  transition: transform 180ms ease, background 180ms ease, color 180ms ease, box-shadow 180ms ease;
+}
+
+.play:hover,
+.like:hover {
+  background: #facc15;
+  color: #111111;
+  box-shadow: 0 10px 20px rgba(250, 204, 21, 0.16);
+  transform: translateY(-1px);
+}
+
+.play fa-icon,
+.like fa-icon {
+  font-size: 0.82rem;
+}
+
+article div {
+  min-width: 0;
+  display: grid;
+}
+
+strong,
+span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 680px) {
+  article {
+    grid-template-columns: 32px minmax(0, 1fr) 38px;
+  }
+
+  .index,
+  .genre,
+  .duration {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  article,
+  .play,
+  .like {
+    transition: none;
+  }
+
+  article:hover,
+  .play:hover,
+  .like:hover {
+    transform: none;
+  }
+}

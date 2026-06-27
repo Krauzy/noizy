@@ -1,0 +1,94 @@
+.playlist-card {
+  min-height: 214px;
+  border-radius: 8px;
+  background: #242424;
+  padding: 14px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.playlist-card:hover {
+  background: #2f2f2f;
+  border-color: rgba(250, 204, 21, 0.24);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.22);
+  transform: translateY(-4px);
+}
+
+.playlist-card:focus-visible {
+  border-color: rgba(250, 204, 21, 0.52);
+}
+
+.cover {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #facc15, #a855f7);
+  color: #121212;
+  overflow: hidden;
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+.cover::before,
+.cover::after,
+.cover span {
+  content: "";
+  position: absolute;
+  bottom: 32%;
+  width: 9%;
+  border-radius: 999px 999px 2px 2px;
+  background: currentColor;
+}
+
+.cover::before {
+  left: 34%;
+  height: 31%;
+}
+
+.cover span {
+  left: 46%;
+  height: 42%;
+}
+
+.cover::after {
+  left: 58%;
+  height: 24%;
+}
+
+.playlist-card:hover .cover {
+  filter: saturate(1.08);
+  transform: scale(1.015);
+}
+
+h3,
+p {
+  margin: 0;
+}
+
+p {
+  color: #a3a3a3;
+}
+
+h3,
+p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .playlist-card,
+  .cover {
+    transition: none;
+  }
+
+  .playlist-card:hover,
+  .playlist-card:hover .cover {
+    transform: none;
+  }
+}

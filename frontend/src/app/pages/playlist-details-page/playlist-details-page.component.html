@@ -1,0 +1,13 @@
+<div class="page">
+  @if (playlist) {
+    <section class="playlist-hero">
+      <span>♬</span>
+      <div>
+        <p>Playlist</p>
+        <h1>{{ playlist.name }}</h1>
+        <small>{{ playlist.description }} · {{ playlist.tracks.length }} tracks</small>
+      </div>
+    </section>
+    <app-track-list [tracks]="playlist.tracks" (play)="play($event)"></app-track-list>
+  }
+</div>

@@ -1,0 +1,64 @@
+.shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  padding-bottom: 0;
+  transition: padding-bottom 240ms ease;
+}
+
+.shell.has-player {
+  padding-bottom: 92px;
+}
+
+.content {
+  min-width: 0;
+  background:
+    linear-gradient(180deg, rgba(250, 204, 21, 0.16), rgba(18, 18, 18, 0) 260px),
+    #121212;
+}
+
+.route-surface {
+  min-width: 0;
+  padding: 0 32px 32px;
+  animation: route-enter 220ms ease-out;
+}
+
+@keyframes route-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .shell.has-player {
+    padding-bottom: 148px;
+  }
+
+  .route-surface {
+    padding: 0 16px 28px;
+  }
+}
+
+@media (max-width: 560px) {
+  .shell.has-player {
+    padding-bottom: 168px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell,
+  .route-surface {
+    animation: none;
+    transition: none;
+  }
+}

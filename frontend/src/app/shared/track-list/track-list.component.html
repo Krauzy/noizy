@@ -1,0 +1,19 @@
+<div class="track-list">
+  @for (track of tracks; track track.id; let i = $index) {
+    <article>
+      <span class="index">{{ i + 1 }}</span>
+      <button type="button" class="play" (click)="play.emit(track)" [attr.aria-label]="'Play ' + track.title">
+        <fa-icon [icon]="icons.play" aria-hidden="true"></fa-icon>
+      </button>
+      <div>
+        <strong>{{ track.title }}</strong>
+        <span>{{ track.artist.name }}</span>
+      </div>
+      <span class="genre">{{ track.genre || 'Track' }}</span>
+      <span class="duration">{{ track.durationSeconds || 0 }}s</span>
+      <button type="button" class="like" (click)="like.emit(track)" [attr.aria-label]="'Like ' + track.title">
+        <fa-icon [icon]="icons.like" aria-hidden="true"></fa-icon>
+      </button>
+    </article>
+  }
+</div>

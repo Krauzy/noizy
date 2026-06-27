@@ -1,0 +1,5 @@
+<a class="artist-card" [routerLink]="['/artists', artist.id]">
+  <span class="avatar">{{ artist.name.charAt(0) }}</span>
+  <h3>{{ artist.name }}</h3>
+  <p>{{ artist.description || 'Artist' }}</p>
+</a>

@@ -1,0 +1,56 @@
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: never
+    include-stacktrace: never
+
+spring:
+  application:
+    name: noizy-backend
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/noizy}
+    username: ${SPRING_DATASOURCE_USERNAME:noizy}
+    password: ${SPRING_DATASOURCE_PASSWORD:noizy}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+  flyway:
+    enabled: true
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 60MB
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+noizy:
+  frontend-origin: ${FRONTEND_ORIGIN:http://localhost:4200}
+  jwt:
+    secret: ${JWT_SECRET:change-this-development-secret-with-at-least-32-chars}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:1440}
+  aws:
+    region: ${AWS_REGION:us-east-1}
+    endpoint: ${AWS_ENDPOINT:}
+    s3:
+      tracks-bucket: ${S3_TRACKS_BUCKET:noizy-tracks}
+      images-bucket: ${S3_IMAGES_BUCKET:noizy-images}
+    sqs:
+      track-events-queue-url: ${SQS_TRACK_EVENTS_QUEUE_URL:}
+    sns:
+      topic-arn: ${SNS_TRACK_EVENTS_TOPIC_ARN:}

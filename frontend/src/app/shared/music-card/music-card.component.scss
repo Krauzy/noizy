@@ -1,0 +1,109 @@
+.music-card {
+  position: relative;
+  min-height: 224px;
+  border-radius: 8px;
+  background: #242424;
+  padding: 14px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.music-card:hover {
+  background: #2f2f2f;
+  border-color: rgba(250, 204, 21, 0.24);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.22);
+  transform: translateY(-4px);
+}
+
+.music-card:focus-within {
+  border-color: rgba(250, 204, 21, 0.52);
+  box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.3);
+}
+
+.cover {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #facc15, #38bdf8);
+  color: #121212;
+  font-size: 1.6rem;
+  font-weight: 900;
+  overflow: hidden;
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+.cover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.22), transparent 56%);
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.music-card:hover .cover,
+.cover:focus-visible {
+  filter: saturate(1.08);
+  transform: scale(1.015);
+}
+
+.music-card:hover .cover::before,
+.cover:focus-visible::before {
+  opacity: 1;
+}
+
+.cover fa-icon {
+  position: relative;
+  margin-left: 4px;
+  font-size: 1.45rem;
+  transition: transform 180ms ease;
+}
+
+.music-card:hover .cover fa-icon,
+.cover:focus-visible fa-icon {
+  transform: scale(1.08);
+}
+
+h3,
+p {
+  margin: 0;
+}
+
+h3 {
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+p,
+small {
+  color: #a3a3a3;
+}
+
+h3,
+p,
+small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .music-card,
+  .cover,
+  .cover::before,
+  .cover fa-icon {
+    transition: none;
+  }
+
+  .music-card:hover,
+  .music-card:hover .cover,
+  .music-card:hover .cover fa-icon {
+    transform: none;
+  }
+}

@@ -1,0 +1,17 @@
+<header class="topbar">
+  <div>
+    <span class="eyebrow">Streaming workspace</span>
+    <strong>Discover, upload, and organize tracks</strong>
+  </div>
+  @if (user$ | async; as user) {
+    <div class="session">
+      <span>{{ user.name }}</span>
+      <button class="button secondary" type="button" (click)="logout()">Logout</button>
+    </div>
+  } @else {
+    <div class="session">
+      <a class="button secondary" routerLink="/login">Login</a>
+      <a class="button" routerLink="/register">Register</a>
+    </div>
+  }
+</header>

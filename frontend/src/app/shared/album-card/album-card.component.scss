@@ -1,0 +1,88 @@
+.album-card {
+  min-height: 214px;
+  border-radius: 8px;
+  background: #242424;
+  padding: 14px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.album-card:hover {
+  background: #2f2f2f;
+  border-color: rgba(250, 204, 21, 0.24);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.22);
+  transform: translateY(-4px);
+}
+
+.album-card:focus-visible {
+  border-color: rgba(250, 204, 21, 0.52);
+}
+
+.cover {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #facc15, #ef4444);
+  color: #121212;
+  overflow: hidden;
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+.cover::before,
+.cover span {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+}
+
+.cover::before {
+  width: 54%;
+  aspect-ratio: 1;
+  border: 10px solid currentColor;
+  opacity: 0.88;
+}
+
+.cover span {
+  width: 18%;
+  aspect-ratio: 1;
+  background: currentColor;
+}
+
+.album-card:hover .cover {
+  filter: saturate(1.08);
+  transform: scale(1.015);
+}
+
+h3,
+p {
+  margin: 0;
+}
+
+p {
+  color: #a3a3a3;
+}
+
+h3,
+p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .album-card,
+  .cover {
+    transition: none;
+  }
+
+  .album-card:hover,
+  .album-card:hover .cover {
+    transform: none;
+  }
+}

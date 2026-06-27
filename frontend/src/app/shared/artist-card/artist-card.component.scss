@@ -1,0 +1,68 @@
+.artist-card {
+  min-height: 214px;
+  border-radius: 8px;
+  background: #242424;
+  padding: 14px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.artist-card:hover {
+  background: #2f2f2f;
+  border-color: rgba(250, 204, 21, 0.24);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.22);
+  transform: translateY(-4px);
+}
+
+.artist-card:focus-visible {
+  border-color: rgba(250, 204, 21, 0.52);
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #facc15, #22c55e);
+  color: #121212;
+  font-size: 3rem;
+  font-weight: 900;
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+.artist-card:hover .avatar {
+  filter: saturate(1.08);
+  transform: scale(1.015);
+}
+
+h3,
+p {
+  margin: 0;
+}
+
+p {
+  color: #a3a3a3;
+}
+
+h3,
+p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .artist-card,
+  .avatar {
+    transition: none;
+  }
+
+  .artist-card:hover,
+  .artist-card:hover .avatar {
+    transform: none;
+  }
+}

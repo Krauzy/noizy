@@ -1,0 +1,13 @@
+<div class="page">
+  @if (album) {
+    <section class="album-hero">
+      <span>●</span>
+      <div>
+        <p>Album</p>
+        <h1>{{ album.title }}</h1>
+        <small>{{ album.artist.name }} · {{ album.releaseDate || 'Release date unavailable' }}</small>
+      </div>
+    </section>
+  }
+  <app-track-list [tracks]="tracks" (play)="play($event)"></app-track-list>
+</div>

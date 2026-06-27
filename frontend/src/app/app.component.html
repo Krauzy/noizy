@@ -1,0 +1,10 @@
+<div class="shell" [class.has-player]="(currentTrack$ | async) !== null">
+  <app-sidebar></app-sidebar>
+  <main class="content">
+    <app-header></app-header>
+    <section class="route-surface">
+      <router-outlet></router-outlet>
+    </section>
+  </main>
+  <app-audio-player></app-audio-player>
+</div>

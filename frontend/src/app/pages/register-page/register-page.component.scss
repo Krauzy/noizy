@@ -1,0 +1,37 @@
+:host {
+  min-height: calc(100vh - 150px);
+  display: grid;
+  place-items: center;
+}
+
+.auth {
+  width: min(100%, 560px);
+  display: grid;
+  gap: 18px;
+  margin: clamp(18px, 5vh, 56px) auto;
+}
+
+h1 {
+  margin: 0;
+  font-size: 2.2rem;
+}
+
+a {
+  color: #facc15;
+  font-weight: 800;
+}
+
+.form {
+  max-width: none;
+}
+
+@media (max-width: 720px) {
+  :host {
+    min-height: auto;
+    place-items: stretch;
+  }
+
+  .auth {
+    margin: 10px auto 0;
+  }
+}

@@ -1,0 +1,8 @@
+<div class="page">
+  <div class="page-title"><h1>Liked Songs</h1></div>
+  @if (tracks.length) {
+    <app-track-list [tracks]="tracks" (play)="play($event)" (like)="unlike($event)"></app-track-list>
+  } @else {
+    <app-empty-state title="No liked songs" description="Like tracks from lists to save them here."></app-empty-state>
+  }
+</div>

@@ -1,0 +1,8 @@
+<article class="music-card">
+  <button type="button" class="cover" (click)="play.emit(track)" [attr.aria-label]="'Play ' + track.title">
+    <fa-icon [icon]="icons.play" aria-hidden="true"></fa-icon>
+  </button>
+  <h3>{{ track.title }}</h3>
+  <p>{{ track.artist.name }}</p>
+  <small>{{ track.genre || 'Track' }} - {{ track.playCount }} plays</small>
+</article>

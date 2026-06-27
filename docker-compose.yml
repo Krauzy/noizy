@@ -1,0 +1,92 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: noizy
+      POSTGRES_USER: noizy
+      POSTGRES_PASSWORD: noizy
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U noizy -d noizy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - noizy-postgres-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  localstack:
+    image: localstack/localstack:3.8
+    environment:
+      SERVICES: s3,sqs,sns
+      AWS_DEFAULT_REGION: us-east-1
+      DEBUG: "0"
+    ports:
+      - "4566:4566"
+    volumes:
+      - noizy-localstack-data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  localstack-init:
+    image: amazon/aws-cli:2.17.42
+    depends_on:
+      - localstack
+    environment:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ENDPOINT: http://localstack:4566
+    entrypoint: ["/bin/sh", "/init-aws.sh"]
+    volumes:
+      - ./docker/localstack/init-aws.sh:/init-aws.sh:ro
+
+  backend:
+    build:
+      context: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      localstack-init:
+        condition: service_completed_successfully
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/noizy
+      SPRING_DATASOURCE_USERNAME: noizy
+      SPRING_DATASOURCE_PASSWORD: noizy
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: change-this-development-secret-with-at-least-32-chars
+      FRONTEND_ORIGIN: http://localhost:8081
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_REGION: us-east-1
+      AWS_ENDPOINT: http://localstack:4566
+      S3_TRACKS_BUCKET: noizy-tracks
+      S3_IMAGES_BUCKET: noizy-images
+      SQS_TRACK_EVENTS_QUEUE_URL: http://localstack:4566/000000000000/noizy-track-events
+      SNS_TRACK_EVENTS_TOPIC_ARN: arn:aws:sns:us-east-1:000000000000:noizy-track-events
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "8081:80"
+
+volumes:
+  noizy-postgres-data:
+  noizy-localstack-data:

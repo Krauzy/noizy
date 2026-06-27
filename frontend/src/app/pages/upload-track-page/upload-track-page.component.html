@@ -1,0 +1,31 @@
+<div class="page">
+  <div class="page-title"><h1>Upload Track</h1></div>
+  <section class="panel">
+    <form class="form" [formGroup]="form" (ngSubmit)="submit()">
+      <label>Title<input type="text" formControlName="title"></label>
+      <label>Artist
+        <select formControlName="artistId">
+          <option value="">Select artist</option>
+          @for (artist of artists; track artist.id) {
+            <option [value]="artist.id">{{ artist.name }}</option>
+          }
+        </select>
+      </label>
+      <label>Album
+        <select formControlName="albumId">
+          <option value="">No album</option>
+          @for (album of albums; track album.id) {
+            <option [value]="album.id">{{ album.title }}</option>
+          }
+        </select>
+      </label>
+      <label>Genre<input type="text" formControlName="genre"></label>
+      <label>Duration in seconds<input type="number" min="0" formControlName="durationSeconds"></label>
+      <label>Audio file<input type="file" accept="audio/*" (change)="fileSelected($event, 'audio')"></label>
+      <label>Cover image<input type="file" accept="image/*" (change)="fileSelected($event, 'cover')"></label>
+      @if (error) { <p class="error">{{ error }}</p> }
+      @if (message) { <p class="success">{{ message }}</p> }
+      <button class="button" type="submit">Upload</button>
+    </form>
+  </section>
+</div>

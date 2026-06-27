@@ -1,0 +1,22 @@
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.profile > span {
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: #facc15;
+  color: #111111;
+  font-size: 1.6rem;
+  font-weight: 900;
+}
+
+strong,
+p {
+  margin: 0;
+}
