@@ -63,3 +63,9 @@ data class TrackStreamResult(
     val statusCode: Int,
     val contentRange: String?
 )
+
+data class TrackCoverResult(
+    val content: java.io.InputStream,
+    val contentType: String,
+    val contentLength: Long
+)

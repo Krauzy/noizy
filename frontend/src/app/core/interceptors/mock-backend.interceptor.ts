@@ -15,7 +15,7 @@ let users: User[] = [
     id: 'user-1',
     name: 'Noizy Listener',
     email: 'demo@noizy.local',
-    role: 'USER',
+    role: 'FREE_TIER',
     createdAt: NOW
   },
   {
@@ -273,7 +273,7 @@ function handleAuth(req: HttpRequest<unknown>, method: string, action?: string):
       id: newId('user'),
       name: body.name?.trim() || 'Noizy User',
       email: body.email?.trim() || `user-${Date.now()}@noizy.local`,
-      role: 'USER',
+      role: 'FREE_TIER',
       createdAt: new Date().toISOString()
     };
     users = [user, ...users];
@@ -409,6 +409,10 @@ function handleTracks(req: HttpRequest<unknown>, method: string, id?: string, ac
     return respond(silentAudioBlob(), 200, new HttpHeaders({ 'Content-Type': 'audio/wav' }));
   }
 
+  if (method === 'GET' && id && action === 'cover') {
+    return respond(mockCoverBlob(), 200, new HttpHeaders({ 'Content-Type': 'image/svg+xml' }));
+  }
+
   if (method === 'GET' && id) {
     return respond(findOrFail(tracks, id, 'track'));
   }
@@ -456,9 +460,18 @@ function handleTracks(req: HttpRequest<unknown>, method: string, id?: string, ac
 
 function handleUpload(req: HttpRequest<unknown>): Observable<HttpResponse<unknown>> {
   const form = req.body instanceof FormData ? req.body : new FormData();
-  const artistId = String(form.get('artistId') ?? artists[0].id);
   const albumId = String(form.get('albumId') ?? '');
-  const artist = artists.find((item) => item.id === artistId) ?? artists[0];
+  const artist = artists.find((item) => item.name === currentUser.name) ?? {
+    id: newId('artist'),
+    name: currentUser.name,
+    description: `Artist profile for ${currentUser.email}`,
+    imageUrl: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  if (!artists.some((item) => item.id === artist.id)) {
+    artists = [artist, ...artists];
+  }
   const album = albums.find((item) => item.id === albumId) ?? null;
   const title = String(form.get('title') ?? 'Uploaded Mock Track');
   const track: Track = {
@@ -467,9 +480,9 @@ function handleUpload(req: HttpRequest<unknown>): Observable<HttpResponse<unknow
     artist,
     album,
     genre: String(form.get('genre') ?? 'Upload'),
-    durationSeconds: Number(form.get('durationSeconds') ?? 0),
+    durationSeconds: 3,
     audioS3Key: `mock/audio/${slug(title)}.wav`,
-    coverS3Key: null,
+    coverS3Key: form.get('cover') ? `mock/covers/${slug(title)}.svg` : null,
     playCount: 0,
     streamUrl: MOCK_AUDIO,
     createdAt: new Date().toISOString(),
@@ -651,6 +664,12 @@ function silentAudioBlob(): Blob {
   const bytes = Uint8Array.from(atob(base64), (char) => char.charCodeAt(0));
 
   return new Blob([bytes], { type: 'audio/wav' });
+}
+
+function mockCoverBlob(): Blob {
+  return new Blob([
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" rx="24" fill="#facc15"/><path d="M52 166h152" stroke="#111" stroke-width="18" stroke-linecap="round"/><path d="M52 202h98" stroke="#111" stroke-width="18" stroke-linecap="round" opacity=".65"/></svg>'
+  ], { type: 'image/svg+xml' });
 }
 
 function newId(prefix: string): string {

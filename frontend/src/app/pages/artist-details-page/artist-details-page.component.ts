@@ -45,4 +45,8 @@ export class ArtistDetailsPageComponent implements OnInit {
   play(track: Track): void {
     this.player.playTrack(track, this.tracks);
   }
+
+  like(track: Track): void {
+    this.tracksService.like(track.id).subscribe();
+  }
 }

@@ -33,7 +33,7 @@ class AuthServiceTest {
         every { users.save(any()) } answers {
             firstArg<UserEntity>().apply {
                 id = UUID.fromString("11111111-1111-1111-1111-111111111111")
-                role = UserRole.USER
+                role = UserRole.FREE_TIER
             }
         }
 

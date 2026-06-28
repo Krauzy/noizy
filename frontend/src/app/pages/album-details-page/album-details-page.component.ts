@@ -4,6 +4,7 @@ import { forkJoin } from 'rxjs';
 import { Album, Track } from '../../core/models/music.models';
 import { AlbumService } from '../../core/services/album.service';
 import { PlayerService } from '../../core/services/player.service';
+import { TrackService } from '../../core/services/track.service';
 import { TrackListComponent } from '../../shared/track-list/track-list.component';
 
 @Component({
@@ -17,7 +18,12 @@ export class AlbumDetailsPageComponent implements OnInit {
   album?: Album;
   tracks: Track[] = [];
 
-  constructor(private readonly route: ActivatedRoute, private readonly albums: AlbumService, private readonly player: PlayerService) {}
+  constructor(
+    private readonly route: ActivatedRoute,
+    private readonly albums: AlbumService,
+    private readonly player: PlayerService,
+    private readonly trackService: TrackService
+  ) {}
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id') ?? '';
@@ -30,5 +36,9 @@ export class AlbumDetailsPageComponent implements OnInit {
 
   play(track: Track): void {
     this.player.playTrack(track, this.tracks);
+  }
+
+  like(track: Track): void {
+    this.trackService.like(track.id).subscribe();
   }
 }

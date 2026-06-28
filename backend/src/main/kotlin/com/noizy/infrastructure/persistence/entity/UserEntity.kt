@@ -14,7 +14,9 @@ import java.time.Instant
 import java.util.UUID
 
 enum class UserRole {
-    USER,
+    FREE_TIER,
+    SUBSCRIBER,
+    ARTIST,
     ADMIN
 }
 
@@ -36,7 +38,7 @@ class UserEntity(
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 32)
-    var role: UserRole = UserRole.USER,
+    var role: UserRole = UserRole.FREE_TIER,
 
     @Column(name = "created_at", nullable = false)
     var createdAt: Instant = Instant.now(),

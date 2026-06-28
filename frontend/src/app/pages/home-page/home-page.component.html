@@ -15,7 +15,7 @@
       @if (tracks.length) {
         <div class="grid">
           @for (track of tracks; track track.id) {
-            <app-music-card [track]="track" (play)="play($event)"></app-music-card>
+            <app-music-card [track]="track" (play)="play($event)" (like)="like($event)"></app-music-card>
           }
         </div>
       } @else {

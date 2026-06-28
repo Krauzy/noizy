@@ -32,9 +32,11 @@ export class PlayerService {
   constructor(private readonly zone: NgZone, private readonly http: HttpClient) {
     this.audio.volume = 0.8;
     this.audio.preload = 'metadata';
-    this.audio.addEventListener('loadedmetadata', () => {
+    const updateDuration = () => {
       this.zone.run(() => this.durationSubject.next(this.safeDuration()));
-    });
+    };
+    this.audio.addEventListener('loadedmetadata', updateDuration);
+    this.audio.addEventListener('durationchange', updateDuration);
     this.audio.addEventListener('timeupdate', () => {
       this.zone.run(() => {
         const duration = this.safeDuration();
@@ -45,6 +47,7 @@ export class PlayerService {
     });
     this.audio.addEventListener('play', () => this.zone.run(() => this.playingSubject.next(true)));
     this.audio.addEventListener('pause', () => this.zone.run(() => this.playingSubject.next(false)));
+    this.audio.addEventListener('error', () => this.zone.run(() => this.playingSubject.next(false)));
     this.audio.addEventListener('ended', () => this.zone.run(() => this.handleEnded()));
   }
 
@@ -53,8 +56,9 @@ export class PlayerService {
     this.currentSubject.next(track);
     this.progressSubject.next(0);
     this.currentTimeSubject.next(0);
-    this.durationSubject.next(0);
+    this.durationSubject.next(track.durationSeconds || 0);
     this.audio.src = this.streamUrl(track);
+    this.audio.load();
     this.audio.play().then(() => this.playingSubject.next(true)).catch(() => this.playingSubject.next(false));
     this.http.post(`${environment.apiUrl}/playback/${track.id}`, {}).subscribe({ error: () => undefined });
   }
@@ -90,7 +94,10 @@ export class PlayerService {
   seek(percent: number): void {
     const duration = this.safeDuration();
     if (!duration) return;
-    this.audio.currentTime = (percent / 100) * duration;
+    const nextTime = (Math.min(100, Math.max(0, percent)) / 100) * duration;
+    this.audio.currentTime = nextTime;
+    this.currentTimeSubject.next(nextTime);
+    this.progressSubject.next(duration ? (nextTime / duration) * 100 : 0);
   }
 
   setVolume(value: number): void {
@@ -172,7 +179,11 @@ export class PlayerService {
   }
 
   private safeDuration(): number {
-    return Number.isFinite(this.audio.duration) ? this.audio.duration : 0;
+    if (Number.isFinite(this.audio.duration) && this.audio.duration > 0) {
+      return this.audio.duration;
+    }
+
+    return this.currentSubject.value?.durationSeconds || 0;
   }
 
   private streamUrl(track: Track): string {
@@ -180,6 +191,6 @@ export class PlayerService {
       return track.streamUrl;
     }
 
-    return `${environment.apiBaseUrl}${track.streamUrl}`;
+    return environment.apiBaseUrl ? `${environment.apiBaseUrl}${track.streamUrl}` : track.streamUrl;
   }
 }

@@ -6,11 +6,13 @@ export interface Page<T> {
   size: number;
 }
 
+export type UserRole = 'FREE_TIER' | 'SUBSCRIBER' | 'ARTIST' | 'ADMIN';
+
 export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'USER' | 'ADMIN';
+  role: UserRole;
   createdAt: string;
 }
 

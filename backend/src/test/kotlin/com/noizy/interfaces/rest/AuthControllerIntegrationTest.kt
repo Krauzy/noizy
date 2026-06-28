@@ -42,6 +42,7 @@ class AuthControllerIntegrationTest {
             status { isOk() }
             jsonPath("$.token") { exists() }
             jsonPath("$.user.email") { value("integration-listener@noizy.local") }
+            jsonPath("$.user.role") { value("FREE_TIER") }
         }.andReturn()
 
         val token = objectMapper.readTree(registerResult.response.contentAsString).get("token").asText()

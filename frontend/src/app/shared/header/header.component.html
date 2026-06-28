@@ -1,8 +1,43 @@
 <header class="topbar">
-  <div>
+  <div class="topbar-heading">
     <span class="eyebrow">Streaming workspace</span>
     <strong>Discover, upload, and organize tracks</strong>
   </div>
+
+  <section class="global-search" [class.open]="searchOpen" (focusin)="openSearch()" (focusout)="closeSearch()">
+    <label>
+      <fa-icon [icon]="icons.search" aria-hidden="true"></fa-icon>
+      <input
+        [formControl]="query"
+        type="search"
+        placeholder="Search tracks"
+        autocomplete="off"
+        (input)="openSearch()"
+        (focus)="openSearch()"
+        (keydown.escape)="closeSearch()">
+    </label>
+
+    @if (searchOpen && (hasSearchQuery || searching || tracks.length)) {
+      <div class="search-results">
+        @if (searching) {
+          <span class="muted">Searching...</span>
+        } @else if (tracks.length) {
+          @for (track of tracks; track track.id) {
+            <button type="button" (mousedown)="play(track); $event.preventDefault()">
+              <fa-icon [icon]="icons.play" aria-hidden="true"></fa-icon>
+              <span>
+                <strong>{{ track.title }}</strong>
+                <small>{{ track.artist.name }}</small>
+              </span>
+            </button>
+          }
+        } @else {
+          <span class="muted">No tracks found</span>
+        }
+      </div>
+    }
+  </section>
+
   @if (user$ | async; as user) {
     <div class="session">
       <span>{{ user.name }}</span>

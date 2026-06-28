@@ -35,17 +35,16 @@ class TrackController(
     private val trackService: TrackService
 ) {
     @PostMapping("/upload")
+    @PreAuthorize("hasRole('ARTIST') or hasRole('ADMIN')")
     fun upload(
         @RequestParam title: String,
-        @RequestParam artistId: UUID,
         @RequestParam(required = false) albumId: UUID?,
         @RequestParam(required = false) genre: String?,
-        @RequestParam(defaultValue = "0") durationSeconds: Int,
         @RequestPart("audio") audio: MultipartFile,
         @RequestPart("cover", required = false) cover: MultipartFile?,
         @AuthenticationPrincipal principal: UserPrincipal
     ): TrackUploadResponse =
-        trackService.upload(title, artistId, albumId, genre, durationSeconds, audio, cover, principal.id)
+        trackService.upload(title, albumId, genre, audio, cover, principal.id)
 
     @GetMapping
     fun list(pageable: Pageable): Page<TrackResponse> =
@@ -76,6 +75,15 @@ class TrackController(
         headers.set(HttpHeaders.ACCEPT_RANGES, "bytes")
         result.contentRange?.let { headers.set(HttpHeaders.CONTENT_RANGE, it) }
         return ResponseEntity(InputStreamResource(result.content), headers, HttpStatus.valueOf(result.statusCode))
+    }
+
+    @GetMapping("/{id}/cover")
+    fun cover(@PathVariable id: UUID): ResponseEntity<InputStreamResource> {
+        val result = trackService.cover(id)
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.parseMediaType(result.contentType)
+        headers.contentLength = result.contentLength
+        return ResponseEntity(InputStreamResource(result.content), headers, HttpStatus.OK)
     }
 
     @PreAuthorize("hasRole('ADMIN')")

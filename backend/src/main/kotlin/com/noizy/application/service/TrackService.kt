@@ -16,6 +16,7 @@ import com.noizy.infrastructure.persistence.repository.UserJpaRepository
 import com.noizy.interfaces.dto.PlaybackHistoryResponse
 import com.noizy.interfaces.dto.TrackRequest
 import com.noizy.interfaces.dto.TrackResponse
+import com.noizy.interfaces.dto.TrackCoverResult
 import com.noizy.interfaces.dto.TrackStreamResult
 import com.noizy.interfaces.dto.TrackUpdateRequest
 import com.noizy.interfaces.dto.TrackUploadResponse
@@ -35,6 +36,7 @@ class TrackService(
     private val history: PlaybackHistoryJpaRepository,
     private val artistService: ArtistService,
     private val albumService: AlbumService,
+    private val audioMetadata: AudioMetadataService,
     private val storage: S3StorageService,
     private val eventPublisher: EventPublisher
 ) {
@@ -68,24 +70,25 @@ class TrackService(
     @Transactional
     fun upload(
         title: String,
-        artistId: UUID,
         albumId: UUID?,
         genre: String?,
-        durationSeconds: Int,
         audio: MultipartFile,
         cover: MultipartFile?,
         userId: UUID
     ): TrackUploadResponse {
         if (audio.isEmpty) throw BadRequestException("Audio file is required")
+        val user = users.findById(userId).orElseThrow { NotFoundException("User") }
+        val artist = artistService.getOrCreateForUploader(user)
+        val durationSeconds = audioMetadata.durationSeconds(audio)
         val audioKey = storage.uploadAudio(audio)
         val coverKey = cover?.takeIf { !it.isEmpty }?.let { storage.uploadCover(it) }
         val track = tracks.save(
             TrackEntity(
                 title = title.trim(),
-                artist = artistService.getEntity(artistId),
+                artist = artist,
                 album = albumId?.let { albumService.getEntity(it) },
                 genre = genre?.trim(),
-                durationSeconds = durationSeconds.coerceAtLeast(0),
+                durationSeconds = durationSeconds,
                 audioS3Key = audioKey,
                 coverS3Key = coverKey
             )
@@ -139,6 +142,18 @@ class TrackService(
             contentLength = s3Stream.returnedLength,
             statusCode = if (contentRange == null) 200 else 206,
             contentRange = contentRange
+        )
+    }
+
+    @Transactional(readOnly = true)
+    fun cover(id: UUID): TrackCoverResult {
+        val track = getEntity(id)
+        val key = track.coverS3Key ?: throw NotFoundException("Track cover")
+        val image = storage.getImage(key)
+        return TrackCoverResult(
+            content = image.stream,
+            contentType = image.contentType,
+            contentLength = image.contentLength
         )
     }
 
