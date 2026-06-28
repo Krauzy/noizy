@@ -1,3 +1,5 @@
+[![wakatime](https://wakatime.com/badge/github/Krauzy/noizy.svg)](https://wakatime.com/badge/github/Krauzy/noizy)
+
 # Noizy
 
 Noizy is a fullstack music streaming platform inspired by common streaming workflows without using protected brands, names, or assets.
