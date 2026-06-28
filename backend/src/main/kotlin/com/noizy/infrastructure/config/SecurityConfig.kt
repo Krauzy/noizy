@@ -37,6 +37,7 @@ class SecurityConfig(
                 it.requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
                 it.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 it.requestMatchers("/actuator/health").permitAll()
+                it.requestMatchers(HttpMethod.POST, "/api/tracks/upload").hasAnyRole("ARTIST", "ADMIN")
                 it.requestMatchers(HttpMethod.GET, "/api/tracks/liked").authenticated()
                 it.requestMatchers(HttpMethod.GET, "/api/playlists/me").authenticated()
                 it.requestMatchers(HttpMethod.GET, "/api/artists/**", "/api/albums/**", "/api/tracks/**", "/api/playlists/public").permitAll()

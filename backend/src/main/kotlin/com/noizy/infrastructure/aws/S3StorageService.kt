@@ -21,6 +21,12 @@ data class S3ObjectStream(
     val returnedLength: Long
 )
 
+data class S3BinaryObject(
+    val stream: ResponseInputStream<GetObjectResponse>,
+    val contentType: String,
+    val contentLength: Long
+)
+
 @Service
 class S3StorageService(
     private val s3: S3Client,
@@ -57,6 +63,19 @@ class S3StorageService(
             )
         } catch (_: NoSuchKeyException) {
             throw NotFoundException("Audio object")
+        }
+    }
+
+    fun getImage(key: String): S3BinaryObject {
+        try {
+            val objectStream = s3.getObject(GetObjectRequest.builder().bucket(imagesBucket).key(key).build())
+            return S3BinaryObject(
+                stream = objectStream,
+                contentType = objectStream.response().contentType() ?: "image/jpeg",
+                contentLength = objectStream.response().contentLength()
+            )
+        } catch (_: NoSuchKeyException) {
+            throw NotFoundException("Image object")
         }
     }
 

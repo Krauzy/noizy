@@ -2,6 +2,7 @@ package com.noizy.application.service
 
 import com.noizy.domain.exception.NotFoundException
 import com.noizy.infrastructure.persistence.entity.ArtistEntity
+import com.noizy.infrastructure.persistence.entity.UserEntity
 import com.noizy.infrastructure.persistence.repository.ArtistJpaRepository
 import com.noizy.interfaces.dto.ArtistRequest
 import com.noizy.interfaces.dto.ArtistResponse
@@ -47,6 +48,17 @@ class ArtistService(
         if (!artists.existsById(id)) throw NotFoundException("Artist")
         artists.deleteById(id)
     }
+
+    fun getOrCreateForUploader(user: UserEntity): ArtistEntity =
+        artists.findFirstByNameIgnoreCase(user.name).orElseGet {
+            artists.save(
+                ArtistEntity(
+                    name = user.name,
+                    description = "Artist profile for ${user.email}",
+                    imageUrl = null
+                )
+            )
+        }
 
     fun getEntity(id: UUID): ArtistEntity =
         artists.findById(id).orElseThrow { NotFoundException("Artist") }

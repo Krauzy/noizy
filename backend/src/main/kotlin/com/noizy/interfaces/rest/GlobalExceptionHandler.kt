@@ -10,9 +10,12 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.ConstraintViolationException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.multipart.MultipartException
+import org.springframework.web.multipart.support.MissingServletRequestPartException
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
@@ -32,7 +35,13 @@ class GlobalExceptionHandler {
     fun unauthorized(ex: UnauthorizedException, request: HttpServletRequest) =
         error(HttpStatus.UNAUTHORIZED, ex.message ?: "Unauthorized", request)
 
-    @ExceptionHandler(BadRequestException::class, ConstraintViolationException::class)
+    @ExceptionHandler(
+        BadRequestException::class,
+        ConstraintViolationException::class,
+        MissingServletRequestParameterException::class,
+        MissingServletRequestPartException::class,
+        MultipartException::class
+    )
     fun badRequest(ex: Exception, request: HttpServletRequest) =
         error(HttpStatus.BAD_REQUEST, ex.message ?: "Bad request", request)
 

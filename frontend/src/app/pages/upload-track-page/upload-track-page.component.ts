@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Album, Artist } from '../../core/models/music.models';
+import { Album } from '../../core/models/music.models';
 import { AlbumService } from '../../core/services/album.service';
-import { ArtistService } from '../../core/services/artist.service';
 import { UploadService } from '../../core/services/upload.service';
 
 @Component({
@@ -13,7 +12,6 @@ import { UploadService } from '../../core/services/upload.service';
   styleUrls: ['./upload-track-page.component.scss']
 })
 export class UploadTrackPageComponent implements OnInit {
-  artists: Artist[] = [];
   albums: Album[] = [];
   audioFile?: File;
   coverFile?: File;
@@ -21,23 +19,17 @@ export class UploadTrackPageComponent implements OnInit {
   error = '';
   readonly form = this.fb.nonNullable.group({
     title: ['', Validators.required],
-    artistId: ['', Validators.required],
     albumId: [''],
-    genre: [''],
-    durationSeconds: [0]
+    genre: ['']
   });
 
   constructor(
     private readonly fb: FormBuilder,
-    private readonly artistsService: ArtistService,
     private readonly albumsService: AlbumService,
     private readonly uploadService: UploadService
   ) {}
 
   ngOnInit(): void {
-    this.artistsService.list(100).subscribe((page) => {
-      this.artists = page.content;
-    });
     this.albumsService.list(100).subscribe((page) => {
       this.albums = page.content;
     });
@@ -54,7 +46,7 @@ export class UploadTrackPageComponent implements OnInit {
 
   submit(): void {
     if (this.form.invalid || !this.audioFile) {
-      this.error = 'Select a title, artist, and audio file.';
+      this.error = 'Select a title and audio file.';
       return;
     }
     this.error = '';
@@ -62,16 +54,14 @@ export class UploadTrackPageComponent implements OnInit {
     const value = this.form.getRawValue();
     this.uploadService.upload({
       title: value.title,
-      artistId: value.artistId,
       albumId: value.albumId || undefined,
       genre: value.genre || undefined,
-      durationSeconds: value.durationSeconds || 0,
       audio: this.audioFile,
       cover: this.coverFile
     }).subscribe({
       next: ({ track }) => {
         this.message = `${track.title} uploaded`;
-        this.form.reset({ title: '', artistId: '', albumId: '', genre: '', durationSeconds: 0 });
+        this.form.reset({ title: '', albumId: '', genre: '' });
         this.audioFile = undefined;
         this.coverFile = undefined;
       },

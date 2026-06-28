@@ -38,7 +38,7 @@ class AuthService(
                 name = request.name.trim(),
                 email = email,
                 passwordHash = passwordEncoder.encode(request.password),
-                role = UserRole.USER
+                role = UserRole.FREE_TIER
             )
         )
         eventPublisher.publish(

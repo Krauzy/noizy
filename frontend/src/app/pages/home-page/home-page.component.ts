@@ -58,4 +58,8 @@ export class HomePageComponent implements OnInit {
   play(track: Track): void {
     this.player.playTrack(track, this.tracks);
   }
+
+  like(track: Track): void {
+    this.trackService.like(track.id).subscribe();
+  }
 }

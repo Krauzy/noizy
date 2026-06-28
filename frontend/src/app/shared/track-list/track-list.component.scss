@@ -32,6 +32,8 @@ article:focus-within {
 .like {
   display: grid;
   place-items: center;
+  justify-self: center;
+  align-self: center;
   width: 34px;
   height: 34px;
   border-radius: 50%;
@@ -50,7 +52,16 @@ article:focus-within {
 
 .play fa-icon,
 .like fa-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 0.82rem;
+  height: 0.82rem;
   font-size: 0.82rem;
+  line-height: 1;
+}
+
+.play fa-icon {
+  margin-left: 2px;
 }
 
 article div {

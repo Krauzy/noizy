@@ -1,8 +1,18 @@
 <article class="music-card">
   <button type="button" class="cover" (click)="play.emit(track)" [attr.aria-label]="'Play ' + track.title">
-    <fa-icon [icon]="icons.play" aria-hidden="true"></fa-icon>
+    @if (coverUrl(track); as cover) {
+      <img [src]="cover" [alt]="track.title + ' cover'">
+    }
+    <span class="play-badge">
+      <fa-icon [icon]="icons.play" aria-hidden="true"></fa-icon>
+    </span>
   </button>
   <h3>{{ track.title }}</h3>
   <p>{{ track.artist.name }}</p>
-  <small>{{ track.genre || 'Track' }} - {{ track.playCount }} plays</small>
+  <footer>
+    <small>{{ track.genre || 'Track' }} - {{ track.playCount }} plays</small>
+    <button type="button" class="like" (click)="like.emit(track)" [attr.aria-label]="'Like ' + track.title">
+      <fa-icon [icon]="icons.like" aria-hidden="true"></fa-icon>
+    </button>
+  </footer>
 </article>

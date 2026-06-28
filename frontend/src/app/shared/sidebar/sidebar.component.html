@@ -1,14 +1,40 @@
-<aside class="sidebar">
-  <a class="brand" routerLink="/">
-    <img class="brand-mark" src="assets/noizy-logo.svg" alt="Noizy logo">
-    <span>Noizy</span>
-  </a>
+<aside class="sidebar" [class.collapsed]="collapsed">
+  <div class="sidebar-head">
+    <a class="brand" routerLink="/" title="Noizy">
+      <img class="brand-mark" src="assets/noizy-logo.svg" alt="Noizy logo">
+      <span>Noizy</span>
+    </a>
+    <button
+      type="button"
+      class="collapse-toggle"
+      [attr.aria-label]="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+      [attr.title]="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+      (click)="toggleCollapsed()">
+      <fa-icon [icon]="collapsed ? icons.expand : icons.collapse" aria-hidden="true"></fa-icon>
+    </button>
+  </div>
+
   <nav>
-    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
-    <a routerLink="/search" routerLinkActive="active">Search</a>
-    <a routerLink="/playlists" routerLinkActive="active">My Playlists</a>
-    <a routerLink="/liked" routerLinkActive="active">Liked Songs</a>
-    <a routerLink="/upload" routerLinkActive="active">Upload Track</a>
-    <a routerLink="/profile" routerLinkActive="active">Profile</a>
+    @for (link of mainLinks; track link.path) {
+      <a [routerLink]="link.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: link.exact }" [attr.title]="collapsed ? link.label : null">
+        <fa-icon [icon]="link.icon" aria-hidden="true"></fa-icon>
+        <span>{{ link.label }}</span>
+      </a>
+    }
+
+    @if (user$ | async; as user) {
+      @for (link of userLinks; track link.path) {
+        <a [routerLink]="link.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: link.exact }" [attr.title]="collapsed ? link.label : null">
+          <fa-icon [icon]="link.icon" aria-hidden="true"></fa-icon>
+          <span>{{ link.label }}</span>
+        </a>
+      }
+      @if (canUpload(user.role)) {
+        <a routerLink="/upload" routerLinkActive="active" [attr.title]="collapsed ? 'Upload Track' : null">
+          <fa-icon [icon]="icons.upload" aria-hidden="true"></fa-icon>
+          <span>Upload Track</span>
+        </a>
+      }
+    }
   </nav>
 </aside>

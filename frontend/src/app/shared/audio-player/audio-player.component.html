@@ -2,7 +2,11 @@
 <footer class="player" aria-label="Music player">
   <section class="track-summary" aria-label="Now playing">
     <span class="art" aria-hidden="true">
-      <span></span>
+      @if (coverUrl(track); as cover) {
+        <img [src]="cover" [alt]="track.title + ' cover'">
+      } @else {
+        <span></span>
+      }
     </span>
     <span class="track-meta">
       <strong>{{ track.title }}</strong>

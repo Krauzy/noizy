@@ -1,0 +1,42 @@
+<div class="page">
+  <div class="page-title">
+    <h1>Settings</h1>
+  </div>
+
+  @if (user$ | async; as user) {
+    <section class="settings-grid">
+      <article class="panel account-panel">
+        <span class="avatar">{{ user.name.charAt(0) }}</span>
+        <div>
+          <small>Account</small>
+          <strong>{{ user.name }}</strong>
+          <p class="muted">{{ user.email }}</p>
+        </div>
+      </article>
+
+      <article class="panel">
+        <small>Plan</small>
+        <strong>{{ roleLabel(user.role) }}</strong>
+        <p class="muted">
+          @if (canUpload(user.role)) {
+            Upload tools are enabled for this account.
+          } @else {
+            Upload tools are available for artist accounts.
+          }
+        </p>
+      </article>
+
+      <article class="panel preferences">
+        <small>Playback</small>
+        <label>
+          <input type="checkbox" checked>
+          Start tracks from the expanded player
+        </label>
+        <label>
+          <input type="checkbox">
+          Normalize volume between tracks
+        </label>
+      </article>
+    </section>
+  }
+</div>

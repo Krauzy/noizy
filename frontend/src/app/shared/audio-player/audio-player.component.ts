@@ -4,18 +4,20 @@ import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
   faBackwardStep,
-  faCirclePause,
-  faCirclePlay,
   faExpand,
   faForwardStep,
   faList,
   faMicrophoneLines,
+  faPause,
+  faPlay,
   faPlus,
   faRepeat,
   faShuffle,
   faVolumeHigh,
   faWindowRestore
 } from '@fortawesome/free-solid-svg-icons';
+import { environment } from '../../../environments/environment';
+import { Track } from '../../core/models/music.models';
 import { LoopMode, PlayerService } from '../../core/services/player.service';
 
 @Component({
@@ -32,8 +34,8 @@ export class AudioPlayerComponent {
     expand: faExpand,
     lyrics: faMicrophoneLines,
     next: faForwardStep,
-    pause: faCirclePause,
-    play: faCirclePlay,
+    pause: faPause,
+    play: faPlay,
     previous: faBackwardStep,
     queue: faList,
     repeat: faRepeat,
@@ -64,6 +66,12 @@ export class AudioPlayerComponent {
     if (mode === 'queue') return 'Loop playlist';
 
     return 'Loop off';
+  }
+
+  coverUrl(track: Track): string | null {
+    if (!track.coverS3Key) return null;
+    const path = `/api/tracks/${track.id}/cover`;
+    return environment.apiBaseUrl ? `${environment.apiBaseUrl}${path}` : path;
   }
 
   formatTime(seconds: number | null): string {

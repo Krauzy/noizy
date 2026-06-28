@@ -1,9 +1,0 @@
-<div class="page">
-  <div class="page-title"><h1>Search</h1></div>
-  <app-search-bar (search)="search($event)"></app-search-bar>
-  @if (tracks.length) {
-    <app-track-list [tracks]="tracks" (play)="play($event)" (like)="like($event)"></app-track-list>
-  } @else if (searched) {
-    <app-empty-state title="No results" description="Try another title, artist, album, or genre."></app-empty-state>
-  }
-</div>

@@ -1,3 +1,83 @@
+.upload-panel {
+  width: min(100%, 620px);
+  margin: 0 auto;
+}
+
+.upload-form {
+  max-width: none;
+}
+
+.upload-form > .muted {
+  margin: 0;
+}
+
+.select-field {
+  position: relative;
+}
+
+.select-control {
+  appearance: none;
+  padding-right: 44px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #facc15 50%),
+    linear-gradient(135deg, #facc15 50%, transparent 50%);
+  background-position:
+    calc(100% - 23px) 50%,
+    calc(100% - 15px) 50%;
+  background-size: 8px 8px, 8px 8px;
+  background-repeat: no-repeat;
+}
+
+.file-control {
+  position: relative;
+  display: grid;
+  gap: 8px;
+}
+
+.file-control input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.file-control strong {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 46px;
+  border: 1px dashed rgba(250, 204, 21, 0.38);
+  border-radius: 8px;
+  padding: 0 14px;
+  background: #101010;
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-control strong::after {
+  content: "Browse";
+  flex: 0 0 auto;
+  border-radius: 6px;
+  padding: 7px 10px;
+  background: #facc15;
+  color: #111111;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+.file-control:hover strong,
+.file-control:focus-within strong {
+  border-color: #facc15;
+  background: #181818;
+}
+
 .success {
   color: #22c55e;
 }

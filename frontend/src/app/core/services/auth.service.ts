@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AuthResponse, User } from '../models/music.models';
+import { AuthResponse, User, UserRole } from '../models/music.models';
 
 const TOKEN_KEY = 'noizy_token';
 const USER_KEY = 'noizy_user';
@@ -22,6 +22,15 @@ export class AuthService {
     return !!this.token();
   }
 
+  currentUser(): User | null {
+    return this.userSubject.value;
+  }
+
+  hasAnyRole(roles: UserRole[]): boolean {
+    const user = this.currentUser();
+    return !!user && roles.includes(user.role);
+  }
+
   login(email: string, password: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, { email, password })
       .pipe(tap((response) => this.persist(response)));
@@ -34,7 +43,10 @@ export class AuthService {
 
   me(): Observable<User> {
     return this.http.get<User>(`${environment.apiUrl}/auth/me`)
-      .pipe(tap((user) => this.userSubject.next(user)));
+      .pipe(tap((user) => {
+        localStorage.setItem(USER_KEY, JSON.stringify(user));
+        this.userSubject.next(user);
+      }));
   }
 
   logout(): void {

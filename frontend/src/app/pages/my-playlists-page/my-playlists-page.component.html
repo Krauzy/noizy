@@ -1,13 +1,5 @@
 <div class="page">
   <div class="page-title"><h1>My Playlists</h1></div>
-  <section class="panel">
-    <form class="form" [formGroup]="form" (ngSubmit)="create()">
-      <label>Name<input type="text" formControlName="name"></label>
-      <label>Description<textarea rows="3" formControlName="description"></textarea></label>
-      <label class="check"><input type="checkbox" formControlName="isPublic"> Public playlist</label>
-      <button class="button" type="submit">Create playlist</button>
-    </form>
-  </section>
 
   @if (playlists.length) {
     <div class="grid">
@@ -16,6 +8,6 @@
       }
     </div>
   } @else {
-    <app-empty-state title="No playlists" description="Create your first playlist above."></app-empty-state>
+    <app-empty-state title="No playlists" description="Saved playlists will appear here."></app-empty-state>
   }
 </div>

@@ -1,17 +1,32 @@
 .sidebar {
   position: sticky;
   top: 0;
+  width: 240px;
   height: 100vh;
   padding: 24px 18px;
   background: #0a0a0a;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
+  transition: width 180ms ease, padding 180ms ease;
+}
+
+.sidebar.collapsed {
+  width: 76px;
+  padding-inline: 12px;
+}
+
+.sidebar-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 28px;
 }
 
 .brand {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 28px;
+  min-width: 0;
   font-size: 1.35rem;
   font-weight: 900;
   transition: transform 180ms ease, opacity 180ms ease;
@@ -22,11 +37,35 @@
 }
 
 .brand-mark {
+  flex: 0 0 auto;
   display: block;
   width: 34px;
   height: 34px;
   border-radius: 8px;
   object-fit: contain;
+}
+
+.brand span,
+nav a span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.collapse-toggle {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #181818;
+  color: #a3a3a3;
+}
+
+.collapse-toggle:hover,
+.collapse-toggle:focus-visible {
+  background: #242424;
+  color: #ffffff;
 }
 
 nav {
@@ -35,6 +74,10 @@ nav {
 }
 
 nav a {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
   border-radius: 8px;
   color: #a3a3a3;
   padding: 12px 13px;
@@ -52,12 +95,63 @@ nav a:hover {
   transform: translateX(3px);
 }
 
+.sidebar.collapsed .sidebar-head {
+  grid-template-columns: 1fr;
+}
+
+.sidebar.collapsed .brand {
+  justify-content: center;
+}
+
+.sidebar.collapsed .brand span,
+.sidebar.collapsed nav a span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.sidebar.collapsed .collapse-toggle {
+  width: 100%;
+}
+
+.sidebar.collapsed nav a {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  padding-inline: 0;
+}
+
 @media (max-width: 900px) {
   .sidebar {
     position: static;
+    width: 100%;
     height: auto;
     padding: 14px 16px;
     overflow: hidden;
+  }
+
+  .sidebar.collapsed {
+    width: 100%;
+    padding: 14px 16px;
+  }
+
+  .sidebar-head {
+    grid-template-columns: minmax(0, 1fr) 34px;
+    margin-bottom: 14px;
+  }
+
+  .sidebar.collapsed .brand {
+    justify-content: start;
+  }
+
+  .sidebar.collapsed .brand span,
+  .sidebar.collapsed nav a span {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
   }
 
   nav {
@@ -70,6 +164,7 @@ nav a:hover {
   }
 
   nav a {
+    grid-template-columns: 20px max-content;
     white-space: nowrap;
   }
 
@@ -79,7 +174,9 @@ nav a:hover {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .sidebar,
   .brand,
+  .collapse-toggle,
   nav a {
     transition: none;
   }
