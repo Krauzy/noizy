@@ -14,4 +14,8 @@ export class ArtistService {
   get(id: string) {
     return this.http.get<Artist>(`${environment.apiUrl}/artists/${id}`);
   }
+
+  search(query: string, size = 6) {
+    return this.http.get<Page<Artist>>(`${environment.apiUrl}/artists/search`, { params: { query, size } });
+  }
 }

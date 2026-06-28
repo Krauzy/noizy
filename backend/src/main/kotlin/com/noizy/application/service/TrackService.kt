@@ -8,12 +8,16 @@ import com.noizy.infrastructure.aws.S3StorageService
 import com.noizy.infrastructure.messaging.EventPublisher
 import com.noizy.infrastructure.persistence.entity.LikedTrackEntity
 import com.noizy.infrastructure.persistence.entity.PlaybackHistoryEntity
+import com.noizy.infrastructure.persistence.entity.TrackCommentEntity
 import com.noizy.infrastructure.persistence.entity.TrackEntity
 import com.noizy.infrastructure.persistence.repository.LikedTrackJpaRepository
 import com.noizy.infrastructure.persistence.repository.PlaybackHistoryJpaRepository
+import com.noizy.infrastructure.persistence.repository.TrackCommentJpaRepository
 import com.noizy.infrastructure.persistence.repository.TrackJpaRepository
 import com.noizy.infrastructure.persistence.repository.UserJpaRepository
 import com.noizy.interfaces.dto.PlaybackHistoryResponse
+import com.noizy.interfaces.dto.TrackCommentRequest
+import com.noizy.interfaces.dto.TrackCommentResponse
 import com.noizy.interfaces.dto.TrackRequest
 import com.noizy.interfaces.dto.TrackResponse
 import com.noizy.interfaces.dto.TrackCoverResult
@@ -34,6 +38,7 @@ class TrackService(
     private val users: UserJpaRepository,
     private val likes: LikedTrackJpaRepository,
     private val history: PlaybackHistoryJpaRepository,
+    private val comments: TrackCommentJpaRepository,
     private val artistService: ArtistService,
     private val albumService: AlbumService,
     private val audioMetadata: AudioMetadataService,
@@ -41,15 +46,22 @@ class TrackService(
     private val eventPublisher: EventPublisher
 ) {
     @Transactional(readOnly = true)
-    fun list(pageable: Pageable): Page<TrackResponse> =
-        tracks.findAll(pageable).map { it.toResponse() }
+    fun list(pageable: Pageable, userId: UUID?): Page<TrackResponse> {
+        val page = tracks.findAll(pageable)
+        val likedIds = likedTrackIds(userId, page.content.mapNotNull { it.id })
+        return page.map { track -> track.toResponse(track.id?.let { it in likedIds } ?: false) }
+    }
 
     @Transactional(readOnly = true)
-    fun search(query: String, pageable: Pageable): Page<TrackResponse> =
-        tracks.search(query.trim(), pageable).map { it.toResponse() }
+    fun search(query: String, pageable: Pageable, userId: UUID?): Page<TrackResponse> {
+        val page = tracks.search(query.trim(), pageable)
+        val likedIds = likedTrackIds(userId, page.content.mapNotNull { it.id })
+        return page.map { track -> track.toResponse(track.id?.let { it in likedIds } ?: false) }
+    }
 
     @Transactional(readOnly = true)
-    fun get(id: UUID): TrackResponse = getEntity(id).toResponse()
+    fun get(id: UUID, userId: UUID?): TrackResponse =
+        getEntity(id).toResponse(userId?.let { likes.existsByUserIdAndTrackId(it, id) } ?: false)
 
     @Transactional
     fun create(request: TrackRequest): TrackResponse {
@@ -174,7 +186,13 @@ class TrackService(
 
     @Transactional(readOnly = true)
     fun playbackHistory(userId: UUID): List<PlaybackHistoryResponse> =
-        history.findTop50ByUserIdOrderByPlayedAtDesc(userId).map { it.toResponse() }
+        history.findTop50ByUserIdOrderByPlayedAtDesc(userId).let { entries ->
+            val likedIds = likedTrackIds(userId, entries.mapNotNull { it.track.id })
+            entries.map { entry ->
+                val trackId = entry.track.id ?: throw NotFoundException("Track id")
+                entry.toResponse(trackId in likedIds)
+            }
+        }
 
     @Transactional
     fun like(trackId: UUID, userId: UUID): TrackResponse {
@@ -183,17 +201,40 @@ class TrackService(
             val user = users.findById(userId).orElseThrow { NotFoundException("User") }
             likes.save(LikedTrackEntity(user = user, track = track))
         }
-        return track.toResponse()
+        return track.toResponse(liked = true)
     }
 
     @Transactional
-    fun unlike(trackId: UUID, userId: UUID) {
+    fun unlike(trackId: UUID, userId: UUID): TrackResponse {
+        val track = getEntity(trackId)
         likes.deleteByUserIdAndTrackId(userId, trackId)
+        return track.toResponse(liked = false)
     }
 
     @Transactional(readOnly = true)
     fun liked(userId: UUID): List<TrackResponse> =
-        likes.findByUserIdOrderByCreatedAtDesc(userId).map { it.track.toResponse() }
+        likes.findByUserIdOrderByCreatedAtDesc(userId).map { it.track.toResponse(liked = true) }
+
+    @Transactional(readOnly = true)
+    fun comments(trackId: UUID): List<TrackCommentResponse> {
+        if (!tracks.existsById(trackId)) throw NotFoundException("Track")
+        return comments.findByTrackIdOrderByCreatedAtDesc(trackId).map { it.toResponse() }
+    }
+
+    @Transactional
+    fun addComment(trackId: UUID, userId: UUID, request: TrackCommentRequest): TrackCommentResponse {
+        val body = request.body.trim()
+        if (body.isBlank()) throw BadRequestException("Comment body is required")
+        val user = users.findById(userId).orElseThrow { NotFoundException("User") }
+        val track = getEntity(trackId)
+        return comments.save(
+            TrackCommentEntity(
+                track = track,
+                user = user,
+                body = body
+            )
+        ).toResponse()
+    }
 
     fun getEntity(id: UUID): TrackEntity =
         tracks.findById(id).orElseThrow { NotFoundException("Track") }
@@ -212,4 +253,7 @@ class TrackService(
         val end = endText.toLongOrNull() ?: (start + returnedLength - 1).coerceAtMost(totalLength - 1)
         return "bytes $start-$end/$totalLength"
     }
+
+    private fun likedTrackIds(userId: UUID?, trackIds: Collection<UUID>): Set<UUID> =
+        if (userId == null || trackIds.isEmpty()) emptySet() else likes.findLikedTrackIds(userId, trackIds).toSet()
 }

@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { Page, PlaybackHistory, Track } from '../models/music.models';
+import { map } from 'rxjs';
+import { Page, PlaybackHistory, Track, TrackComment } from '../models/music.models';
 
 @Injectable({ providedIn: 'root' })
 export class TrackService {
@@ -15,6 +16,10 @@ export class TrackService {
     return this.http.get<Page<Track>>(`${environment.apiUrl}/tracks/search`, { params: { query, size } });
   }
 
+  get(id: string) {
+    return this.http.get<Track>(`${environment.apiUrl}/tracks/${id}`);
+  }
+
   liked() {
     return this.http.get<Track[]>(`${environment.apiUrl}/tracks/liked`);
   }
@@ -24,7 +29,13 @@ export class TrackService {
   }
 
   unlike(id: string) {
-    return this.http.delete<void>(`${environment.apiUrl}/tracks/${id}/like`);
+    return this.http.delete<Track>(`${environment.apiUrl}/tracks/${id}/like`);
+  }
+
+  toggleLike(track: Track) {
+    return track.liked
+      ? this.unlike(track.id)
+      : this.like(track.id);
   }
 
   recordPlayback(id: string) {
@@ -33,5 +44,15 @@ export class TrackService {
 
   history() {
     return this.http.get<PlaybackHistory[]>(`${environment.apiUrl}/playback/history`);
+  }
+
+  comments(id: string) {
+    return this.http.get<TrackComment[]>(`${environment.apiUrl}/tracks/${id}/comments`);
+  }
+
+  addComment(id: string, body: string) {
+    return this.http.post<TrackComment>(`${environment.apiUrl}/tracks/${id}/comments`, { body }).pipe(
+      map((comment) => comment)
+    );
   }
 }

@@ -8,6 +8,7 @@ import com.noizy.domain.exception.NotFoundException
 import com.noizy.infrastructure.messaging.EventPublisher
 import com.noizy.infrastructure.persistence.entity.PlaylistEntity
 import com.noizy.infrastructure.persistence.entity.PlaylistTrackEntity
+import com.noizy.infrastructure.persistence.repository.LikedTrackJpaRepository
 import com.noizy.infrastructure.persistence.repository.PlaylistJpaRepository
 import com.noizy.infrastructure.persistence.repository.PlaylistTrackJpaRepository
 import com.noizy.infrastructure.persistence.repository.UserJpaRepository
@@ -23,6 +24,7 @@ class PlaylistService(
     private val playlists: PlaylistJpaRepository,
     private val playlistTracks: PlaylistTrackJpaRepository,
     private val users: UserJpaRepository,
+    private val likes: LikedTrackJpaRepository,
     private val trackService: TrackService,
     private val eventPublisher: EventPublisher
 ) {
@@ -49,7 +51,7 @@ class PlaylistService(
 
     @Transactional(readOnly = true)
     fun mine(ownerId: UUID): List<PlaylistResponse> =
-        playlists.findByOwnerIdOrderByCreatedAtDesc(ownerId).map { it.toResponse(tracksFor(it)) }
+        playlists.findByOwnerIdOrderByCreatedAtDesc(ownerId).map { it.toResponseFor(ownerId) }
 
     @Transactional(readOnly = true)
     fun publicPlaylists(): List<PlaylistResponse> =
@@ -61,7 +63,7 @@ class PlaylistService(
         if (!playlist.isPublic && playlist.owner.id != requesterId) {
             throw ForbiddenException()
         }
-        return playlist.toResponse(tracksFor(playlist))
+        return playlist.toResponseFor(requesterId)
     }
 
     @Transactional
@@ -71,7 +73,7 @@ class PlaylistService(
         playlist.name = request.name.trim()
         playlist.description = request.description?.trim()
         playlist.isPublic = request.isPublic
-        return playlist.toResponse(tracksFor(playlist))
+        return playlist.toResponseFor(requesterId)
     }
 
     @Transactional
@@ -89,7 +91,7 @@ class PlaylistService(
                 position = position
             )
         )
-        return playlist.toResponse(tracksFor(playlist))
+        return playlist.toResponseFor(requesterId)
     }
 
     @Transactional
@@ -97,7 +99,7 @@ class PlaylistService(
         val playlist = getEntity(id)
         ensureOwner(playlist, requesterId)
         playlistTracks.deleteByPlaylistIdAndTrackId(id, trackId)
-        return playlist.toResponse(tracksFor(playlist))
+        return playlist.toResponseFor(requesterId)
     }
 
     fun getEntity(id: UUID): PlaylistEntity =
@@ -105,6 +107,17 @@ class PlaylistService(
 
     private fun tracksFor(playlist: PlaylistEntity): List<PlaylistTrackEntity> =
         playlistTracks.findByPlaylistIdOrderByPositionAsc(playlist.id ?: throw NotFoundException("Playlist id"))
+
+    private fun PlaylistEntity.toResponseFor(requesterId: UUID?): PlaylistResponse {
+        val tracks = tracksFor(this)
+        val trackIds = tracks.mapNotNull { it.track.id }
+        val likedIds = if (requesterId == null || trackIds.isEmpty()) {
+            emptySet()
+        } else {
+            likes.findLikedTrackIds(requesterId, trackIds).toSet()
+        }
+        return toResponse(tracks, likedIds)
+    }
 
     private fun ensureOwner(playlist: PlaylistEntity, requesterId: UUID) {
         if (playlist.owner.id != requesterId) throw ForbiddenException()

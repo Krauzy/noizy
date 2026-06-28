@@ -3,6 +3,8 @@ package com.noizy.application.service
 import com.noizy.domain.exception.NotFoundException
 import com.noizy.infrastructure.persistence.entity.AlbumEntity
 import com.noizy.infrastructure.persistence.repository.AlbumJpaRepository
+import com.noizy.infrastructure.persistence.repository.LikedTrackJpaRepository
+import com.noizy.infrastructure.persistence.repository.TrackJpaRepository
 import com.noizy.interfaces.dto.AlbumRequest
 import com.noizy.interfaces.dto.AlbumResponse
 import com.noizy.interfaces.dto.TrackResponse
@@ -17,7 +19,8 @@ import java.util.UUID
 class AlbumService(
     private val albums: AlbumJpaRepository,
     private val artistService: ArtistService,
-    private val tracks: com.noizy.infrastructure.persistence.repository.TrackJpaRepository
+    private val tracks: TrackJpaRepository,
+    private val likes: LikedTrackJpaRepository
 ) {
     @Transactional
     fun create(request: AlbumRequest): AlbumResponse =
@@ -38,9 +41,12 @@ class AlbumService(
     fun get(id: UUID): AlbumResponse = getEntity(id).toResponse()
 
     @Transactional(readOnly = true)
-    fun tracksForAlbum(id: UUID): List<TrackResponse> {
+    fun tracksForAlbum(id: UUID, userId: UUID?): List<TrackResponse> {
         if (!albums.existsById(id)) throw NotFoundException("Album")
-        return tracks.findByAlbumId(id).map { it.toResponse() }
+        val albumTracks = tracks.findByAlbumId(id)
+        val trackIds = albumTracks.mapNotNull { track -> track.id }
+        val likedIds = if (userId == null || trackIds.isEmpty()) emptySet() else likes.findLikedTrackIds(userId, trackIds).toSet()
+        return albumTracks.map { track -> track.toResponse(track.id?.let { it in likedIds } ?: false) }
     }
 
     @Transactional

@@ -1,0 +1,18 @@
+@if (notifications$ | async; as items) {
+  @if (items.length) {
+    <section class="notifications" aria-live="polite" aria-label="Notifications">
+      @for (item of items; track item.id) {
+        <article class="toast" [class]="item.kind">
+          <fa-icon [icon]="icon(item.kind)" aria-hidden="true"></fa-icon>
+          <div>
+            <strong>{{ item.title }}</strong>
+            <span>{{ item.message }}</span>
+          </div>
+          <button type="button" aria-label="Dismiss notification" (click)="notifications.dismiss(item.id)">
+            <fa-icon [icon]="icons.close" aria-hidden="true"></fa-icon>
+          </button>
+        </article>
+      }
+    </section>
+  }
+}

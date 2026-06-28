@@ -1,8 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, NgZone } from '@angular/core';
+import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Track } from '../models/music.models';
+import { AuthService } from './auth.service';
+import { NotificationService } from './notification.service';
 
 export type LoopMode = 'off' | 'track' | 'queue';
 
@@ -29,7 +32,13 @@ export class PlayerService {
   readonly loopMode$ = this.loopModeSubject.asObservable();
   readonly shuffle$ = this.shuffleSubject.asObservable();
 
-  constructor(private readonly zone: NgZone, private readonly http: HttpClient) {
+  constructor(
+    private readonly zone: NgZone,
+    private readonly http: HttpClient,
+    private readonly auth: AuthService,
+    private readonly router: Router,
+    private readonly notifications: NotificationService
+  ) {
     this.audio.volume = 0.8;
     this.audio.preload = 'metadata';
     const updateDuration = () => {
@@ -52,6 +61,12 @@ export class PlayerService {
   }
 
   playTrack(track: Track, queue: Track[] = this.queueSubject.value): void {
+    if (!this.auth.isAuthenticated()) {
+      this.notifications.info('Login required', 'Log in to play tracks.');
+      this.router.navigateByUrl('/login');
+      return;
+    }
+
     this.queueSubject.next(queue.length ? queue : [track]);
     this.currentSubject.next(track);
     this.progressSubject.next(0);
@@ -65,6 +80,11 @@ export class PlayerService {
 
   toggle(): void {
     if (!this.currentSubject.value) return;
+    if (!this.auth.isAuthenticated()) {
+      this.notifications.info('Login required', 'Log in to play tracks.');
+      this.router.navigateByUrl('/login');
+      return;
+    }
     if (this.audio.paused) {
       this.audio.play().then(() => this.playingSubject.next(true)).catch(() => this.playingSubject.next(false));
     } else {

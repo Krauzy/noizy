@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-06-28",
+  "project": "Noizy",
+  "description": "Curated context index for the Noizy project. Query this before broad repository searches.",
+  "retrieval": {
+    "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .agents/scripts/search-context.ps1 -Query \"<query>\" -Top 5",
+    "jsonCommand": "powershell -NoProfile -ExecutionPolicy Bypass -File .agents/scripts/search-context.ps1 -Query \"<query>\" -Top 5 -Json",
+    "fallback": "Use rg/direct file reads when the top results do not answer the orientation question or when verifying current source."
+  },
+  "documents": [
+    {
+      "id": "project-overview",
+      "title": "Project overview and stack",
+      "path": ".agents/context/project-overview.md",
+      "tags": ["overview", "stack", "monorepo", "noizy", "architecture"],
+      "summary": "High-level map of the Noizy monorepo, current stack, key ports, local credentials, and known drift notes.",
+      "sourcePaths": ["README.md", "docs/architecture.md", "frontend/package.json", "backend/build.gradle.kts"]
+    },
+    {
+      "id": "backend-map",
+      "title": "Backend map",
+      "path": ".agents/context/backend-map.md",
+      "tags": ["backend", "kotlin", "spring", "jwt", "s3", "range", "flyway", "events", "controllers"],
+      "summary": "Backend package layout, security behavior, REST controllers, services, persistence, S3 streaming, and event publishing.",
+      "sourcePaths": ["backend/src/main/kotlin/com/noizy", "backend/src/main/resources/application.yml", "backend/src/main/resources/db/migration"]
+    },
+    {
+      "id": "frontend-map",
+      "title": "Frontend map",
+      "path": ".agents/context/frontend-map.md",
+      "tags": ["frontend", "angular", "routes", "guards", "services", "mock", "assets", "scss"],
+      "summary": "Angular project layout, routes, service boundaries, auth/mock interceptors, branding assets, and build commands.",
+      "sourcePaths": ["frontend/src/app", "frontend/angular.json", "frontend/package.json"]
+    },
+    {
+      "id": "infra-local-runtime",
+      "title": "Infrastructure and local runtime",
+      "path": ".agents/context/infra-local-runtime.md",
+      "tags": ["docker", "compose", "localstack", "postgres", "redis", "terraform", "kubernetes", "aws"],
+      "summary": "Docker Compose services, LocalStack resources, ports, Terraform/Kubernetes areas, and runtime coupling.",
+      "sourcePaths": ["docker-compose.yml", "docker/localstack/init-aws.sh", "infra/terraform", "infra/kubernetes", ".env.example"]
+    },
+    {
+      "id": "validation-runbook",
+      "title": "Validation runbook",
+      "path": ".agents/context/validation-runbook.md",
+      "tags": ["validation", "tests", "build", "terraform", "docker", "health", "range", "audit"],
+      "summary": "Known validation commands and when to use backend, frontend, infra, or full-stack checks.",
+      "sourcePaths": ["README.md", "backend/build.gradle.kts", "frontend/package.json", "docker-compose.yml"]
+    },
+    {
+      "id": "shared-memory",
+      "title": "Shared memory from prior Noizy work",
+      "path": ".agents/context/shared-memory.md",
+      "tags": ["memory", "rebrand", "soundly", "noizy", "branding", "regression", "validated"],
+      "summary": "Reusable project knowledge from the previous Soundly-to-Noizy rename and stack revalidation.",
+      "sourcePaths": ["Codex memory: MEMORY.md lines 72-114"]
+    },
+    {
+      "id": "rag-maintenance",
+      "title": "RAG maintenance rules",
+      "path": ".agents/context/rag-maintenance.md",
+      "tags": ["rag", "agent", "maintenance", "context", "index", "search"],
+      "summary": "Rules for keeping the local context RAG useful, scoped, current, and free of secrets.",
+      "sourcePaths": [".agents/context/index.json", ".agents/scripts/search-context.ps1"]
+    }
+  ]
+}

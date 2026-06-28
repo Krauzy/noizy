@@ -4,10 +4,12 @@ import com.noizy.application.service.AlbumService
 import com.noizy.interfaces.dto.AlbumRequest
 import com.noizy.interfaces.dto.AlbumResponse
 import com.noizy.interfaces.dto.TrackResponse
+import com.noizy.infrastructure.security.UserPrincipal
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -37,8 +39,8 @@ class AlbumController(
         albumService.get(id)
 
     @GetMapping("/{id}/tracks")
-    fun tracks(@PathVariable id: UUID): List<TrackResponse> =
-        albumService.tracksForAlbum(id)
+    fun tracks(@PathVariable id: UUID, @AuthenticationPrincipal principal: UserPrincipal?): List<TrackResponse> =
+        albumService.tracksForAlbum(id, principal?.id)
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")

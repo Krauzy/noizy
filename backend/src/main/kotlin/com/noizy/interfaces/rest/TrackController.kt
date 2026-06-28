@@ -3,6 +3,8 @@ package com.noizy.interfaces.rest
 import com.noizy.application.service.TrackService
 import com.noizy.infrastructure.security.UserPrincipal
 import com.noizy.interfaces.dto.PlaybackHistoryResponse
+import com.noizy.interfaces.dto.TrackCommentRequest
+import com.noizy.interfaces.dto.TrackCommentResponse
 import com.noizy.interfaces.dto.TrackResponse
 import com.noizy.interfaces.dto.TrackUpdateRequest
 import com.noizy.interfaces.dto.TrackUploadResponse
@@ -47,20 +49,24 @@ class TrackController(
         trackService.upload(title, albumId, genre, audio, cover, principal.id)
 
     @GetMapping
-    fun list(pageable: Pageable): Page<TrackResponse> =
-        trackService.list(pageable)
+    fun list(pageable: Pageable, @AuthenticationPrincipal principal: UserPrincipal?): Page<TrackResponse> =
+        trackService.list(pageable, principal?.id)
 
     @GetMapping("/search")
-    fun search(@RequestParam query: String, pageable: Pageable): Page<TrackResponse> =
-        trackService.search(query, pageable)
+    fun search(
+        @RequestParam query: String,
+        pageable: Pageable,
+        @AuthenticationPrincipal principal: UserPrincipal?
+    ): Page<TrackResponse> =
+        trackService.search(query, pageable, principal?.id)
 
     @GetMapping("/liked")
     fun liked(@AuthenticationPrincipal principal: UserPrincipal): List<TrackResponse> =
         trackService.liked(principal.id)
 
     @GetMapping("/{id}")
-    fun get(@PathVariable id: UUID): TrackResponse =
-        trackService.get(id)
+    fun get(@PathVariable id: UUID, @AuthenticationPrincipal principal: UserPrincipal?): TrackResponse =
+        trackService.get(id, principal?.id)
 
     @GetMapping("/{id}/stream")
     fun stream(
@@ -101,6 +107,18 @@ class TrackController(
         trackService.like(id, principal.id)
 
     @DeleteMapping("/{id}/like")
-    fun unlike(@PathVariable id: UUID, @AuthenticationPrincipal principal: UserPrincipal) =
+    fun unlike(@PathVariable id: UUID, @AuthenticationPrincipal principal: UserPrincipal): TrackResponse =
         trackService.unlike(id, principal.id)
+
+    @GetMapping("/{id}/comments")
+    fun comments(@PathVariable id: UUID): List<TrackCommentResponse> =
+        trackService.comments(id)
+
+    @PostMapping("/{id}/comments")
+    fun addComment(
+        @PathVariable id: UUID,
+        @Valid @org.springframework.web.bind.annotation.RequestBody request: TrackCommentRequest,
+        @AuthenticationPrincipal principal: UserPrincipal
+    ): TrackCommentResponse =
+        trackService.addComment(id, principal.id, request)
 }

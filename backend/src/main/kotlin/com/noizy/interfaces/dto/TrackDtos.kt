@@ -45,6 +45,7 @@ data class TrackResponse(
     val audioS3Key: String,
     val coverS3Key: String?,
     val playCount: Long,
+    val liked: Boolean,
     val streamUrl: String,
     val createdAt: Instant,
     val updatedAt: Instant
@@ -68,4 +69,19 @@ data class TrackCoverResult(
     val content: java.io.InputStream,
     val contentType: String,
     val contentLength: Long
+)
+
+data class TrackCommentRequest(
+    @field:NotBlank
+    @field:Size(max = 1200)
+    val body: String
+)
+
+data class TrackCommentResponse(
+    val id: UUID,
+    val trackId: UUID,
+    val user: UserResponse,
+    val body: String,
+    val createdAt: Instant,
+    val updatedAt: Instant
 )

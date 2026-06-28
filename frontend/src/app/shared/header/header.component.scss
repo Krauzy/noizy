@@ -89,7 +89,8 @@
   padding: 10px 12px;
 }
 
-.search-results button {
+.search-results button,
+.search-results a {
   display: grid;
   grid-template-columns: 28px minmax(0, 1fr);
   align-items: center;
@@ -103,17 +104,30 @@
 }
 
 .search-results button:hover,
-.search-results button:focus-visible {
+.search-results button:focus-visible,
+.search-results a:hover,
+.search-results a:focus-visible {
   background: #242424;
 }
 
-.search-results button > fa-icon {
+.search-results button > fa-icon,
+.artist-dot {
   display: grid;
   place-items: center;
   color: #facc15;
 }
 
-.search-results button span {
+.artist-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(250, 204, 21, 0.16);
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.search-results button span,
+.search-results a span:not(.artist-dot) {
   display: grid;
   min-width: 0;
   gap: 2px;
@@ -128,6 +142,14 @@
 
 .search-results small {
   color: #a3a3a3;
+}
+
+.result-group {
+  padding: 7px 10px 2px;
+  color: #facc15;
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
 .session {

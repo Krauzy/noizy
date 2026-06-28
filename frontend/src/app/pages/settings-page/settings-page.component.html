@@ -6,7 +6,17 @@
   @if (user$ | async; as user) {
     <section class="settings-grid">
       <article class="panel account-panel">
-        <span class="avatar">{{ user.name.charAt(0) }}</span>
+        <label class="avatar-control" title="Change profile photo">
+          <input type="file" accept="image/*" (change)="avatarSelected($event)">
+          @if (avatarPreviewUrl) {
+            <img [src]="avatarPreviewUrl" alt="Profile photo preview">
+          } @else if (avatarUrl(user); as avatar) {
+            <img [src]="avatar" [alt]="user.name + ' profile photo'">
+          } @else {
+            <span class="avatar">{{ user.name.charAt(0) }}</span>
+          }
+          <strong>{{ avatarUploading ? 'Uploading' : 'Change photo' }}</strong>
+        </label>
         <div>
           <small>Account</small>
           <strong>{{ user.name }}</strong>
@@ -28,12 +38,14 @@
 
       <article class="panel preferences">
         <small>Playback</small>
-        <label>
+        <label class="check-option">
           <input type="checkbox" checked>
+          <span aria-hidden="true"></span>
           Start tracks from the expanded player
         </label>
-        <label>
+        <label class="check-option">
           <input type="checkbox">
+          <span aria-hidden="true"></span>
           Normalize volume between tracks
         </label>
       </article>

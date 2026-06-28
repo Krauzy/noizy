@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "name": "noizy-project-agent",
+  "project": "Noizy",
+  "purpose": "Assist with Noizy code changes by retrieving curated project context before broad repository searches.",
+  "repo": {
+    "root": ".",
+    "primaryLanguages": [
+      "Kotlin",
+      "TypeScript",
+      "SCSS",
+      "HCL",
+      "YAML",
+      "Shell",
+      "PowerShell"
+    ],
+    "mainAreas": {
+      "backend": "backend/src/main/kotlin/com/noizy",
+      "frontend": "frontend/src/app",
+      "terraform": "infra/terraform",
+      "kubernetes": "infra/kubernetes",
+      "localRuntime": "docker-compose.yml"
+    }
+  },
+  "startupChecklist": [
+    "Read AGENTS.md.",
+    "Run the context RAG with the user request before broad searches.",
+    "Use returned context to choose targeted files.",
+    "Verify current source files before editing because context can drift.",
+    "Update context documents when the change creates reusable project knowledge."
+  ],
+  "contextRag": {
+    "type": "local-lexical",
+    "indexPath": ".agents/context/index.json",
+    "searchCommand": "powershell -NoProfile -ExecutionPolicy Bypass -File .agents/scripts/search-context.ps1 -Query \"<query>\" -Top 5",
+    "jsonSearchCommand": "powershell -NoProfile -ExecutionPolicy Bypass -File .agents/scripts/search-context.ps1 -Query \"<query>\" -Top 5 -Json",
+    "policy": "Use the RAG first for orientation, then use targeted rg/direct reads for current-state verification."
+  },
+  "workingRules": [
+    "Keep backend controller, service, repository, security, and infrastructure responsibilities separated.",
+    "Keep frontend routes, guards, services, models, interceptors, pages, and shared components consistent.",
+    "Treat Docker Compose, LocalStack, Flyway seed data, frontend mocks, and docs as coupled for user-visible feature changes.",
+    "Avoid unrelated rewrites and preserve existing worktree changes that are not part of the task."
+  ],
+  "validation": {
+    "backendTests": "cd backend; .\\gradlew.bat test",
+    "frontendBuild": "cd frontend; npm run build",
+    "frontendTests": "cd frontend; npm test",
+    "terraformFormat": "cd infra/terraform; terraform fmt -check -recursive",
+    "fullStack": "docker compose up -d --build"
+  }
+}

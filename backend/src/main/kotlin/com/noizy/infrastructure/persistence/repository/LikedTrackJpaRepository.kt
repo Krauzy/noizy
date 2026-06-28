@@ -11,6 +11,9 @@ interface LikedTrackJpaRepository : JpaRepository<LikedTrackEntity, UUID> {
     fun existsByUserIdAndTrackId(userId: UUID, trackId: UUID): Boolean
     fun findByUserIdOrderByCreatedAtDesc(userId: UUID): List<LikedTrackEntity>
 
+    @Query("select lt.track.id from LikedTrackEntity lt where lt.user.id = :userId and lt.track.id in :trackIds")
+    fun findLikedTrackIds(@Param("userId") userId: UUID, @Param("trackIds") trackIds: Collection<UUID>): List<UUID>
+
     @Modifying
     @Query("delete from LikedTrackEntity lt where lt.user.id = :userId and lt.track.id = :trackId")
     fun deleteByUserIdAndTrackId(@Param("userId") userId: UUID, @Param("trackId") trackId: UUID): Int
