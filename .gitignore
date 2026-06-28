@@ -18,3 +18,4 @@ tmp/
 localstack-data/
 postgres-data/
 redis-data/
+backend/gradle/wrapper/gradle-wrapper.jar
