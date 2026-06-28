@@ -1,7 +1,7 @@
 import { HttpErrorResponse, HttpHeaders, HttpInterceptorFn, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Observable, delay, of, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Album, Artist, AuthResponse, Page, PlaybackHistory, Playlist, Track, User } from '../models/music.models';
+import { Album, Artist, AuthResponse, Page, PlaybackHistory, Playlist, Track, TrackComment, User } from '../models/music.models';
 
 const LATENCY_MS = 180;
 const NOW = '2026-06-27T12:00:00.000Z';
@@ -97,6 +97,7 @@ let tracks: Track[] = [
     audioS3Key: 'mock/audio/city-lights.wav',
     coverS3Key: null,
     playCount: 12840,
+    liked: false,
     streamUrl: MOCK_AUDIO,
     createdAt: NOW,
     updatedAt: NOW
@@ -111,6 +112,7 @@ let tracks: Track[] = [
     audioS3Key: 'mock/audio/bright-noise.wav',
     coverS3Key: null,
     playCount: 9840,
+    liked: false,
     streamUrl: MOCK_AUDIO,
     createdAt: NOW,
     updatedAt: NOW
@@ -125,6 +127,7 @@ let tracks: Track[] = [
     audioS3Key: 'mock/audio/harbor-run.wav',
     coverS3Key: null,
     playCount: 22410,
+    liked: false,
     streamUrl: MOCK_AUDIO,
     createdAt: NOW,
     updatedAt: NOW
@@ -139,6 +142,7 @@ let tracks: Track[] = [
     audioS3Key: 'mock/audio/low-tide.wav',
     coverS3Key: null,
     playCount: 6370,
+    liked: false,
     streamUrl: MOCK_AUDIO,
     createdAt: NOW,
     updatedAt: NOW
@@ -153,6 +157,7 @@ let tracks: Track[] = [
     audioS3Key: 'mock/audio/samba-grid.wav',
     coverS3Key: null,
     playCount: 17320,
+    liked: false,
     streamUrl: MOCK_AUDIO,
     createdAt: NOW,
     updatedAt: NOW
@@ -167,6 +172,7 @@ let tracks: Track[] = [
     audioS3Key: 'mock/audio/solar-loop.wav',
     coverS3Key: null,
     playCount: 14190,
+    liked: false,
     streamUrl: MOCK_AUDIO,
     createdAt: NOW,
     updatedAt: NOW
@@ -174,6 +180,17 @@ let tracks: Track[] = [
 ];
 
 let likedTrackIds = new Set<string>(['track-city-lights', 'track-samba-grid']);
+
+let comments: TrackComment[] = [
+  {
+    id: 'comment-1',
+    trackId: 'track-city-lights',
+    user: users[0],
+    body: 'The chorus lift is working really well here.',
+    createdAt: NOW,
+    updatedAt: NOW
+  }
+];
 
 let playlists: Playlist[] = [
   {
@@ -233,8 +250,8 @@ function handleMockRequest(req: HttpRequest<unknown>, path: string): Observable<
     return handleAuth(req, method, id);
   }
 
-  if (resource === 'users' && method === 'GET' && id === 'me') {
-    return respond(currentUser);
+  if (resource === 'users') {
+    return handleUsers(method, id, action);
   }
 
   if (resource === 'artists') {
@@ -289,6 +306,11 @@ function handleAuth(req: HttpRequest<unknown>, method: string, action?: string):
 }
 
 function handleArtists(req: HttpRequest<unknown>, method: string, id?: string): Observable<HttpResponse<unknown>> {
+  if (method === 'GET' && id === 'search') {
+    const query = req.params.get('query')?.toLowerCase().trim() ?? '';
+    return respond(pageOf(artists.filter((artist) => artistMatchesQuery(artist, query)), req));
+  }
+
   if (method === 'GET' && !id) {
     return respond(pageOf(artists, req));
   }
@@ -339,7 +361,7 @@ function handleAlbums(req: HttpRequest<unknown>, method: string, id?: string, ac
   }
 
   if (method === 'GET' && id && action === 'tracks') {
-    return respond(tracks.filter((track) => track.album?.id === id));
+    return respond(tracks.filter((track) => track.album?.id === id).map(withLiked));
   }
 
   if (method === 'GET' && id) {
@@ -394,15 +416,15 @@ function handleTracks(req: HttpRequest<unknown>, method: string, id?: string, ac
 
   if (method === 'GET' && id === 'search') {
     const query = req.params.get('query')?.toLowerCase().trim() ?? '';
-    return respond(pageOf(tracks.filter((track) => trackMatchesQuery(track, query)), req));
+    return respond(pageOf(tracks.filter((track) => trackMatchesQuery(track, query)).map(withLiked), req));
   }
 
   if (method === 'GET' && id === 'liked') {
-    return respond(tracks.filter((track) => likedTrackIds.has(track.id)));
+    return respond(tracks.filter((track) => likedTrackIds.has(track.id)).map(withLiked));
   }
 
   if (method === 'GET' && !id) {
-    return respond(pageOf(tracks, req));
+    return respond(pageOf(tracks.map(withLiked), req));
   }
 
   if (method === 'GET' && id && action === 'stream') {
@@ -413,8 +435,26 @@ function handleTracks(req: HttpRequest<unknown>, method: string, id?: string, ac
     return respond(mockCoverBlob(), 200, new HttpHeaders({ 'Content-Type': 'image/svg+xml' }));
   }
 
+  if (method === 'GET' && id && action === 'comments') {
+    return respond(comments.filter((comment) => comment.trackId === id));
+  }
+
+  if (method === 'POST' && id && action === 'comments') {
+    const body = req.body as Partial<TrackComment>;
+    const comment: TrackComment = {
+      id: newId('comment'),
+      trackId: id,
+      user: currentUser,
+      body: body.body?.trim() || 'Mock comment',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    comments = [comment, ...comments];
+    return respond(comment, 201);
+  }
+
   if (method === 'GET' && id) {
-    return respond(findOrFail(tracks, id, 'track'));
+    return respond(withLiked(findOrFail(tracks, id, 'track')));
   }
 
   if (method === 'PUT' && id) {
@@ -437,12 +477,12 @@ function handleTracks(req: HttpRequest<unknown>, method: string, id?: string, ac
 
   if (method === 'DELETE' && id && action === 'like') {
     likedTrackIds.delete(id);
-    return respond(null, 204);
+    return respond(withLiked(findOrFail(tracks, id, 'track')));
   }
 
   if (method === 'POST' && id && action === 'like') {
     likedTrackIds.add(id);
-    return respond(findOrFail(tracks, id, 'track'));
+    return respond(withLiked(findOrFail(tracks, id, 'track')));
   }
 
   if (method === 'DELETE' && id) {
@@ -484,6 +524,7 @@ function handleUpload(req: HttpRequest<unknown>): Observable<HttpResponse<unknow
     audioS3Key: `mock/audio/${slug(title)}.wav`,
     coverS3Key: form.get('cover') ? `mock/covers/${slug(title)}.svg` : null,
     playCount: 0,
+    liked: false,
     streamUrl: MOCK_AUDIO,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -500,15 +541,15 @@ function handlePlaylists(
   nestedId?: string
 ): Observable<HttpResponse<unknown>> {
   if (method === 'GET' && id === 'me') {
-    return respond(playlists.filter((playlist) => playlist.owner.id === currentUser.id));
+    return respond(playlists.filter((playlist) => playlist.owner.id === currentUser.id).map(hydratePlaylist));
   }
 
   if (method === 'GET' && id === 'public') {
-    return respond(playlists.filter((playlist) => playlist.isPublic));
+    return respond(playlists.filter((playlist) => playlist.isPublic).map(hydratePlaylist));
   }
 
   if (method === 'GET' && id) {
-    return respond(findOrFail(playlists, id, 'playlist'));
+    return respond(hydratePlaylist(findOrFail(playlists, id, 'playlist')));
   }
 
   if (method === 'POST' && !id) {
@@ -524,7 +565,7 @@ function handlePlaylists(
       updatedAt: new Date().toISOString()
     };
     playlists = [playlist, ...playlists];
-    return respond(playlist, 201);
+    return respond(hydratePlaylist(playlist), 201);
   }
 
   if (method === 'PUT' && id) {
@@ -538,7 +579,7 @@ function handlePlaylists(
       updatedAt: new Date().toISOString()
     };
     playlists = playlists.map((playlist) => playlist.id === id ? updated : playlist);
-    return respond(updated);
+    return respond(hydratePlaylist(updated));
   }
 
   if (method === 'POST' && id && action === 'tracks' && nestedId) {
@@ -550,7 +591,7 @@ function handlePlaylists(
       updatedAt: new Date().toISOString()
     };
     playlists = playlists.map((item) => item.id === id ? updated : item);
-    return respond(updated);
+    return respond(hydratePlaylist(updated));
   }
 
   if (method === 'DELETE' && id && action === 'tracks' && nestedId) {
@@ -561,7 +602,7 @@ function handlePlaylists(
       updatedAt: new Date().toISOString()
     };
     playlists = playlists.map((item) => item.id === id ? updated : item);
-    return respond(updated);
+    return respond(hydratePlaylist(updated));
   }
 
   return fail(404, `No mock playlists route for ${method}`);
@@ -631,6 +672,51 @@ function trackMatchesQuery(track: Track, query: string): boolean {
     track.album?.title,
     track.genre
   ].some((value) => value?.toLowerCase().includes(query));
+}
+
+function handleUsers(method: string, id?: string, action?: string): Observable<HttpResponse<unknown>> {
+  if (method === 'GET' && id === 'me') {
+    return respond(currentUser);
+  }
+
+  if (method === 'POST' && id === 'me' && action === 'avatar') {
+    currentUser = {
+      ...currentUser,
+      avatarS3Key: `mock/avatars/${currentUser.id}.svg`,
+      avatarUrl: `/api/users/${currentUser.id}/avatar`
+    };
+    users = users.map((user) => user.id === currentUser.id ? currentUser : user);
+    return respond(currentUser);
+  }
+
+  if (method === 'GET' && id && action === 'avatar') {
+    return respond(mockCoverBlob(), 200, new HttpHeaders({ 'Content-Type': 'image/svg+xml' }));
+  }
+
+  return fail(404, `No mock users route for ${method}`);
+}
+
+function artistMatchesQuery(artist: Artist, query: string): boolean {
+  if (!query) return true;
+
+  return [
+    artist.name,
+    artist.description
+  ].some((value) => value?.toLowerCase().includes(query));
+}
+
+function withLiked(track: Track): Track {
+  return {
+    ...track,
+    liked: likedTrackIds.has(track.id)
+  };
+}
+
+function hydratePlaylist(playlist: Playlist): Playlist {
+  return {
+    ...playlist,
+    tracks: playlist.tracks.map(withLiked)
+  };
 }
 
 function findOrFail<T extends { id: string }>(items: T[], id: string, label: string): T {

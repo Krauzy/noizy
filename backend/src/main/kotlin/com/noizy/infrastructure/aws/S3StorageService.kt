@@ -33,6 +33,8 @@ class S3StorageService(
     @Value("\${noizy.aws.s3.tracks-bucket}") private val tracksBucket: String,
     @Value("\${noizy.aws.s3.images-bucket}") private val imagesBucket: String
 ) {
+    private val audioChunkSize = 1_048_576L
+
     fun uploadAudio(file: MultipartFile): String {
         val extension = file.originalFilename?.substringAfterLast('.', "mp3") ?: "mp3"
         val key = "tracks/${UUID.randomUUID()}.$extension"
@@ -47,12 +49,20 @@ class S3StorageService(
         return key
     }
 
+    fun uploadAvatar(file: MultipartFile): String {
+        val extension = file.originalFilename?.substringAfterLast('.', "jpg") ?: "jpg"
+        val key = "avatars/${UUID.randomUUID()}.$extension"
+        put(imagesBucket, key, file)
+        return key
+    }
+
     fun getAudio(key: String, rangeHeader: String?): S3ObjectStream {
         try {
             val head = s3.headObject(HeadObjectRequest.builder().bucket(tracksBucket).key(key).build())
             val builder = GetObjectRequest.builder().bucket(tracksBucket).key(key)
-            if (!rangeHeader.isNullOrBlank()) {
-                builder.range(rangeHeader)
+            val normalizedRange = normalizeAudioRange(rangeHeader, head.contentLength())
+            if (!normalizedRange.isNullOrBlank()) {
+                builder.range(normalizedRange)
             }
             val objectStream = s3.getObject(builder.build())
             return S3ObjectStream(
@@ -64,6 +74,17 @@ class S3StorageService(
         } catch (_: NoSuchKeyException) {
             throw NotFoundException("Audio object")
         }
+    }
+
+    private fun normalizeAudioRange(rangeHeader: String?, totalLength: Long): String? {
+        if (rangeHeader.isNullOrBlank() || !rangeHeader.startsWith("bytes=")) return rangeHeader
+        val range = rangeHeader.removePrefix("bytes=").substringBefore(',')
+        val startText = range.substringBefore('-')
+        val endText = range.substringAfter('-', "")
+        val start = startText.toLongOrNull() ?: return rangeHeader
+        val requestedEnd = endText.toLongOrNull()
+        val cappedEnd = requestedEnd ?: (start + audioChunkSize - 1).coerceAtMost(totalLength - 1)
+        return "bytes=$start-${cappedEnd.coerceAtMost(totalLength - 1)}"
     }
 
     fun getImage(key: String): S3BinaryObject {

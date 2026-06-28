@@ -38,6 +38,14 @@ data class UserResponse(
     val id: UUID,
     val name: String,
     val email: String,
+    val avatarS3Key: String?,
+    val avatarUrl: String?,
     val role: UserRole,
     val createdAt: Instant
+)
+
+data class UserAvatarResult(
+    val content: java.io.InputStream,
+    val contentType: String,
+    val contentLength: Long
 )

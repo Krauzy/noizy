@@ -10,26 +10,41 @@
       <input
         [formControl]="query"
         type="search"
-        placeholder="Search tracks"
+        placeholder="Search tracks or artists"
         autocomplete="off"
         (input)="openSearch()"
         (focus)="openSearch()"
         (keydown.escape)="closeSearch()">
     </label>
 
-    @if (searchOpen && (hasSearchQuery || searching || tracks.length)) {
+    @if (searchOpen && (hasSearchQuery || searching || tracks.length || artists.length)) {
       <div class="search-results">
         @if (searching) {
           <span class="muted">Searching...</span>
-        } @else if (tracks.length) {
-          @for (track of tracks; track track.id) {
-            <button type="button" (mousedown)="play(track); $event.preventDefault()">
-              <fa-icon [icon]="icons.play" aria-hidden="true"></fa-icon>
-              <span>
-                <strong>{{ track.title }}</strong>
-                <small>{{ track.artist.name }}</small>
-              </span>
-            </button>
+        } @else if (tracks.length || artists.length) {
+          @if (tracks.length) {
+            <small class="result-group">Tracks</small>
+            @for (track of tracks; track track.id) {
+              <button type="button" (mousedown)="play(track); $event.preventDefault()">
+                <fa-icon [icon]="icons.play" aria-hidden="true"></fa-icon>
+                <span>
+                  <strong>{{ track.title }}</strong>
+                  <small>{{ track.artist.name }}</small>
+                </span>
+              </button>
+            }
+          }
+          @if (artists.length) {
+            <small class="result-group">Artists</small>
+            @for (artist of artists; track artist.id) {
+              <a [routerLink]="['/artists', artist.id]" (mousedown)="openArtist(artist.id); $event.preventDefault()">
+                <span class="artist-dot">{{ artist.name.charAt(0) }}</span>
+                <span>
+                  <strong>{{ artist.name }}</strong>
+                  <small>Artist</small>
+                </span>
+              </a>
+            }
           }
         } @else {
           <span class="muted">No tracks found</span>

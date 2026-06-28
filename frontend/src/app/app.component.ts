@@ -5,11 +5,13 @@ import { HeaderComponent } from './shared/header/header.component';
 import { SidebarComponent } from './shared/sidebar/sidebar.component';
 import { AudioPlayerComponent } from './shared/audio-player/audio-player.component';
 import { PlayerService } from './core/services/player.service';
+import { NotificationsComponent } from './shared/notifications/notifications.component';
+import { PlaylistModalComponent } from './shared/playlist-modal/playlist-modal.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [AsyncPipe, RouterOutlet, HeaderComponent, SidebarComponent, AudioPlayerComponent],
+  imports: [AsyncPipe, RouterOutlet, HeaderComponent, SidebarComponent, AudioPlayerComponent, NotificationsComponent, PlaylistModalComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })

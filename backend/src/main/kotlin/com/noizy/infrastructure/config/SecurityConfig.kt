@@ -40,6 +40,7 @@ class SecurityConfig(
                 it.requestMatchers(HttpMethod.POST, "/api/tracks/upload").hasAnyRole("ARTIST", "ADMIN")
                 it.requestMatchers(HttpMethod.GET, "/api/tracks/liked").authenticated()
                 it.requestMatchers(HttpMethod.GET, "/api/playlists/me").authenticated()
+                it.requestMatchers(HttpMethod.GET, "/api/users/*/avatar").permitAll()
                 it.requestMatchers(HttpMethod.GET, "/api/artists/**", "/api/albums/**", "/api/tracks/**", "/api/playlists/public").permitAll()
                 it.requestMatchers(HttpMethod.GET, "/api/playlists/*").permitAll()
                 it.anyRequest().authenticated()

@@ -36,6 +36,9 @@ class UserEntity(
     @Column(name = "password_hash", nullable = false, length = 120)
     var passwordHash: String = "",
 
+    @Column(name = "avatar_s3_key", columnDefinition = "TEXT")
+    var avatarS3Key: String? = null,
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 32)
     var role: UserRole = UserRole.FREE_TIER,

@@ -32,6 +32,10 @@ class ArtistService(
         artists.findAll(pageable).map { it.toResponse() }
 
     @Transactional(readOnly = true)
+    fun search(query: String, pageable: Pageable): Page<ArtistResponse> =
+        artists.search(query.trim(), pageable).map { it.toResponse() }
+
+    @Transactional(readOnly = true)
     fun get(id: UUID): ArtistResponse = getEntity(id).toResponse()
 
     @Transactional

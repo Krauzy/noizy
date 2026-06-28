@@ -9,10 +9,10 @@
       }
     </span>
     <span class="track-meta">
-      <strong>{{ track.title }}</strong>
-      <span>{{ track.artist.name }}</span>
+      <strong><a [routerLink]="['/tracks', track.id]">{{ track.title }}</a></strong>
+      <span><a [routerLink]="['/artists', track.artist.id]">{{ track.artist.name }}</a></span>
     </span>
-    <button type="button" class="icon-button subtle" aria-label="Add to playlist" title="Add to playlist">
+    <button type="button" class="icon-button subtle add-track" aria-label="Add to playlist" title="Add to playlist" (click)="addToPlaylist(track)">
       <fa-icon [icon]="icons.add" aria-hidden="true"></fa-icon>
     </button>
   </section>
@@ -37,7 +37,7 @@
       </button>
       @if (loopMode$ | async; as loopMode) {
         <button type="button" class="icon-button mode-icon loop-toggle" [class.active]="loopMode !== 'off'" [class.track-loop]="loopMode === 'track'" [class.queue-loop]="loopMode === 'queue'" [attr.aria-pressed]="loopMode !== 'off' ? 'true' : 'false'" [attr.aria-label]="loopLabel(loopMode)" [attr.title]="loopLabel(loopMode)" (click)="player.cycleLoopMode()">
-          <fa-icon [icon]="icons.repeat" aria-hidden="true"></fa-icon>
+          <fa-icon [icon]="loopIcon(loopMode)" aria-hidden="true"></fa-icon>
           <span class="loop-state" aria-hidden="true"></span>
         </button>
       }
@@ -51,9 +51,6 @@
   </section>
 
   <section class="player-actions" aria-label="Player options">
-    <button type="button" class="icon-button utility" aria-label="Lyrics" title="Lyrics">
-      <fa-icon [icon]="icons.lyrics" aria-hidden="true"></fa-icon>
-    </button>
     <button type="button" class="icon-button utility" aria-label="Queue" title="Queue">
       <fa-icon [icon]="icons.queue" aria-hidden="true"></fa-icon>
     </button>

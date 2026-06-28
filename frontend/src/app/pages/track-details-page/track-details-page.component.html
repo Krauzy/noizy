@@ -1,0 +1,79 @@
+<div class="page">
+  @if (track; as currentTrack) {
+    <section class="track-hero">
+      <div class="cover-art">
+        @if (coverUrl(currentTrack); as cover) {
+          <img [src]="cover" [alt]="currentTrack.title + ' cover'">
+        }
+      </div>
+      <div class="track-copy">
+        <p>Track</p>
+        <h1>{{ currentTrack.title }}</h1>
+        <a [routerLink]="['/artists', currentTrack.artist.id]">{{ currentTrack.artist.name }}</a>
+        <span>{{ currentTrack.genre || 'Track' }} - {{ currentTrack.durationSeconds }}s - {{ currentTrack.playCount }} plays</span>
+        <div class="actions">
+          <button class="button" type="button" (click)="play()">
+            <fa-icon [icon]="icons.play" aria-hidden="true"></fa-icon>
+            Play
+          </button>
+          <button class="button secondary" type="button" [class.active]="currentTrack.liked" (click)="toggleLike()">
+            <fa-icon [icon]="icons.like" aria-hidden="true"></fa-icon>
+            {{ currentTrack.liked ? 'Liked' : 'Like' }}
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="artist-panel panel">
+      <span>{{ currentTrack.artist.name.charAt(0) }}</span>
+      <div>
+        <small>Artist</small>
+        <a [routerLink]="['/artists', currentTrack.artist.id]">{{ currentTrack.artist.name }}</a>
+        <p class="muted">{{ currentTrack.artist.description || 'No artist description yet.' }}</p>
+      </div>
+    </section>
+
+    <section class="comments panel">
+      <div class="section-title">
+        <h2>Comments</h2>
+      </div>
+
+      @if (user$ | async) {
+        <form [formGroup]="commentForm" (ngSubmit)="submitComment()">
+          <textarea rows="3" formControlName="body" maxlength="1200" placeholder="Add a comment"></textarea>
+          <button class="button" type="submit" [disabled]="commentSaving">
+            <fa-icon [icon]="icons.comment" aria-hidden="true"></fa-icon>
+            {{ commentSaving ? 'Posting...' : 'Post comment' }}
+          </button>
+        </form>
+      } @else {
+        <p class="muted">Log in to join the discussion.</p>
+      }
+
+      <div class="comment-list">
+        @for (comment of comments; track comment.id) {
+          <article>
+            <span class="comment-avatar">
+              @if (avatarUrl(comment.user); as avatar) {
+                <img [src]="avatar" [alt]="comment.user.name + ' avatar'">
+              } @else {
+                {{ comment.user.name.charAt(0) }}
+              }
+            </span>
+            <div>
+              <strong>{{ comment.user.name }}</strong>
+              <small>{{ formatDate(comment.createdAt) }}</small>
+              <p>{{ comment.body }}</p>
+            </div>
+          </article>
+        } @empty {
+          <p class="muted">No comments yet.</p>
+        }
+      </div>
+    </section>
+  } @else if (!loading) {
+    <section class="panel">
+      <h1>Track not found</h1>
+    </section>
+  }
+</div>

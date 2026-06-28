@@ -5,7 +5,7 @@
 
 article {
   display: grid;
-  grid-template-columns: 34px 38px minmax(0, 1fr) minmax(90px, 0.35fr) 70px 38px;
+  grid-template-columns: 34px 38px minmax(0, 1fr) minmax(90px, 0.35fr) 70px 38px 38px;
   align-items: center;
   gap: 10px;
   min-height: 58px;
@@ -29,7 +29,8 @@ article:focus-within {
 }
 
 .play,
-.like {
+.like,
+.options {
   display: grid;
   place-items: center;
   justify-self: center;
@@ -43,7 +44,9 @@ article:focus-within {
 }
 
 .play:hover,
-.like:hover {
+.like:hover,
+.like.active,
+.options:hover {
   background: #facc15;
   color: #111111;
   box-shadow: 0 10px 20px rgba(250, 204, 21, 0.16);
@@ -51,7 +54,8 @@ article:focus-within {
 }
 
 .play fa-icon,
-.like fa-icon {
+.like fa-icon,
+.options fa-icon {
   display: inline-grid;
   place-items: center;
   width: 0.82rem;
@@ -76,9 +80,13 @@ span {
   white-space: nowrap;
 }
 
+a:hover {
+  color: #facc15;
+}
+
 @media (max-width: 680px) {
   article {
-    grid-template-columns: 32px minmax(0, 1fr) 38px;
+    grid-template-columns: 32px minmax(0, 1fr) 38px 38px;
   }
 
   .index,

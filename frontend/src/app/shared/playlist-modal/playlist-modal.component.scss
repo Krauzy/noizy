@@ -1,0 +1,195 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.58);
+  backdrop-filter: blur(10px);
+}
+
+.playlist-modal {
+  display: grid;
+  gap: 18px;
+  width: min(520px, 100%);
+  max-height: min(720px, calc(100vh - 40px));
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 18px;
+  background: #181818;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.46);
+}
+
+header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+small,
+h3 {
+  color: #facc15;
+}
+
+small {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+h2,
+h3 {
+  margin: 0;
+}
+
+h2 {
+  font-size: 1.35rem;
+}
+
+h3 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+header button,
+.playlist-options button {
+  background: transparent;
+  color: #ffffff;
+}
+
+header button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+}
+
+header button:hover,
+header button:focus-visible {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+section,
+form {
+  display: grid;
+  gap: 12px;
+}
+
+.playlist-options {
+  display: grid;
+  gap: 8px;
+}
+
+.playlist-options button {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: left;
+}
+
+.playlist-options button:hover,
+.playlist-options button:focus-visible {
+  border-color: rgba(250, 204, 21, 0.42);
+  background: rgba(250, 204, 21, 0.08);
+}
+
+.playlist-options fa-icon {
+  display: grid;
+  place-items: center;
+  color: #facc15;
+}
+
+.playlist-options span {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.playlist-options strong,
+.playlist-options small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+form label {
+  display: grid;
+  gap: 7px;
+  color: #d4d4d4;
+  font-size: 0.92rem;
+}
+
+input,
+textarea {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: #0f0f0f;
+  color: #ffffff;
+  padding: 12px 13px;
+  outline: none;
+}
+
+input:focus,
+textarea:focus {
+  border-color: #facc15;
+}
+
+.check-option {
+  display: flex;
+  grid-template-columns: none;
+  align-items: center;
+  gap: 12px;
+}
+
+.check-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.check-option span {
+  position: relative;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 22px;
+  border-radius: 999px;
+  background: #2f2f2f;
+  transition: background 180ms ease, box-shadow 180ms ease;
+}
+
+.check-option span::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #a3a3a3;
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+.check-option input:checked + span {
+  background: rgba(250, 204, 21, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(250, 204, 21, 0.55);
+}
+
+.check-option input:checked + span::before {
+  transform: translateX(16px);
+  background: #facc15;
+}
+
+.button[disabled] {
+  cursor: wait;
+  opacity: 0.72;
+}

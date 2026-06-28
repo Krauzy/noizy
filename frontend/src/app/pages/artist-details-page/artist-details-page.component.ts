@@ -47,6 +47,6 @@ export class ArtistDetailsPageComponent implements OnInit {
   }
 
   like(track: Track): void {
-    this.tracksService.like(track.id).subscribe();
+    this.tracksService.toggleLike(track).subscribe((updated) => Object.assign(track, updated));
   }
 }
