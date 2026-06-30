@@ -49,6 +49,16 @@ export class AuthService {
       }));
   }
 
+  uploadAvatar(file: File): Observable<User> {
+    const form = new FormData();
+    form.append('avatar', file);
+    return this.http.post<User>(`${environment.apiUrl}/users/me/avatar`, form)
+      .pipe(tap((user) => {
+        localStorage.setItem(USER_KEY, JSON.stringify(user));
+        this.userSubject.next(user);
+      }));
+  }
+
   logout(): void {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);

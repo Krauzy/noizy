@@ -6,12 +6,15 @@
         <fa-icon [icon]="icons.play" aria-hidden="true"></fa-icon>
       </button>
       <div>
-        <strong>{{ track.title }}</strong>
-        <span>{{ track.artist.name }}</span>
+        <strong><a [routerLink]="['/tracks', track.id]">{{ track.title }}</a></strong>
+        <span><a [routerLink]="['/artists', track.artist.id]">{{ track.artist.name }}</a></span>
       </div>
       <span class="genre">{{ track.genre || 'Track' }}</span>
       <span class="duration">{{ track.durationSeconds || 0 }}s</span>
-      <button type="button" class="like" (click)="like.emit(track)" [attr.aria-label]="'Like ' + track.title">
+      <button type="button" class="options" title="Add to playlist" (click)="openOptions(track)" [attr.aria-label]="'Options for ' + track.title">
+        <fa-icon [icon]="icons.options" aria-hidden="true"></fa-icon>
+      </button>
+      <button type="button" class="like" [class.active]="track.liked" (click)="like.emit(track)" [attr.aria-label]="(track.liked ? 'Unlike ' : 'Like ') + track.title">
         <fa-icon [icon]="icons.like" aria-hidden="true"></fa-icon>
       </button>
     </article>

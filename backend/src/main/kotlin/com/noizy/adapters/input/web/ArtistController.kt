@@ -31,6 +31,10 @@ class ArtistController(
     fun list(pageable: Pageable): Page<ArtistResponse> =
         artistUseCase.list(pageable)
 
+    @GetMapping("/search")
+    fun search(@org.springframework.web.bind.annotation.RequestParam query: String, pageable: Pageable): Page<ArtistResponse> =
+        artistService.search(query, pageable)
+
     @GetMapping("/{id}")
     fun get(@PathVariable id: UUID): ArtistResponse =
         artistUseCase.get(id)

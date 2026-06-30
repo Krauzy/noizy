@@ -1,29 +1,32 @@
 import { AsyncPipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
+  faArrowsRotate,
   faBackwardStep,
   faExpand,
   faForwardStep,
   faList,
-  faMicrophoneLines,
   faPause,
   faPlay,
   faPlus,
   faRepeat,
+  faRotateRight,
   faShuffle,
   faVolumeHigh,
   faWindowRestore
 } from '@fortawesome/free-solid-svg-icons';
 import { environment } from '../../../environments/environment';
 import { Track } from '../../core/models/music.models';
+import { PlaylistModalService } from '../../core/services/playlist-modal.service';
 import { LoopMode, PlayerService } from '../../core/services/player.service';
 
 @Component({
   selector: 'app-audio-player',
   standalone: true,
-  imports: [AsyncPipe, FormsModule, FontAwesomeModule],
+  imports: [AsyncPipe, FormsModule, FontAwesomeModule, RouterLink],
   templateUrl: './audio-player.component.html',
   styleUrls: ['./audio-player.component.scss']
 })
@@ -32,13 +35,14 @@ export class AudioPlayerComponent {
     add: faPlus,
     device: faWindowRestore,
     expand: faExpand,
-    lyrics: faMicrophoneLines,
+    loopOff: faRepeat,
+    loopQueue: faArrowsRotate,
+    loopTrack: faRotateRight,
     next: faForwardStep,
     pause: faPause,
     play: faPlay,
     previous: faBackwardStep,
     queue: faList,
-    repeat: faRepeat,
     shuffle: faShuffle,
     volume: faVolumeHigh
   };
@@ -51,7 +55,7 @@ export class AudioPlayerComponent {
   readonly loopMode$ = this.player.loopMode$;
   readonly shuffle$ = this.player.shuffle$;
 
-  constructor(readonly player: PlayerService) {}
+  constructor(readonly player: PlayerService, private readonly playlistModal: PlaylistModalService) {}
 
   seek(event: Event): void {
     this.player.seek(Number((event.target as HTMLInputElement).value));
@@ -66,6 +70,16 @@ export class AudioPlayerComponent {
     if (mode === 'queue') return 'Loop playlist';
 
     return 'Loop off';
+  }
+
+  loopIcon(mode: LoopMode | null) {
+    if (mode === 'track') return this.icons.loopTrack;
+    if (mode === 'queue') return this.icons.loopQueue;
+    return this.icons.loopOff;
+  }
+
+  addToPlaylist(track: Track): void {
+    this.playlistModal.open(track);
   }
 
   coverUrl(track: Track): string | null {

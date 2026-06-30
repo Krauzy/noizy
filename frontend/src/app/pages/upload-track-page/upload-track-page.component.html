@@ -23,9 +23,21 @@
         <input type="file" accept="image/*" (change)="fileSelected($event, 'cover')">
         <strong>{{ coverFile?.name || 'Choose cover' }}</strong>
       </label>
+      @if (coverPreviewUrl) {
+        <figure class="cover-preview">
+          <img [src]="coverPreviewUrl" alt="Cover preview">
+          <figcaption>Cover preview</figcaption>
+        </figure>
+      }
+      @if (uploading || uploadProgress > 0) {
+        <div class="upload-progress" [attr.aria-label]="'Upload progress ' + uploadProgress + '%'">
+          <span [style.width.%]="uploadProgress"></span>
+          <strong>{{ uploadProgress }}%</strong>
+        </div>
+      }
       @if (error) { <p class="error">{{ error }}</p> }
       @if (message) { <p class="success">{{ message }}</p> }
-      <button class="button" type="submit">Upload</button>
+      <button class="button" type="submit" [disabled]="uploading">{{ uploading ? 'Uploading...' : 'Upload' }}</button>
     </form>
   </section>
 </div>

@@ -96,12 +96,18 @@
 
 footer {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 32px;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
 }
 
-.like {
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.like,
+.options {
   display: grid;
   place-items: center;
   width: 32px;
@@ -112,9 +118,16 @@ footer {
 }
 
 .like:hover,
-.like:focus-visible {
+.like:focus-visible,
+.like.active,
+.options:hover,
+.options:focus-visible {
   background: #facc15;
   color: #111111;
+}
+
+.like.active {
+  box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.4);
 }
 
 h3,
@@ -126,6 +139,11 @@ footer {
 h3 {
   font-size: 1rem;
   line-height: 1.25;
+}
+
+h3 a:hover,
+p a:hover {
+  color: #facc15;
 }
 
 p,
@@ -146,7 +164,8 @@ small {
   .cover,
   .cover::before,
   .play-badge fa-icon,
-  .like {
+  .like,
+  .options {
     transition: none;
   }
 

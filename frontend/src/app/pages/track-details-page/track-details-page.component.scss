@@ -1,0 +1,184 @@
+.track-hero {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  align-items: end;
+  gap: 24px;
+  min-width: 0;
+}
+
+.cover-art {
+  display: grid;
+  place-items: center;
+  width: 220px;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #facc15, #38bdf8 48%, #22c55e);
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.28);
+}
+
+.cover-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.track-copy {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.track-copy p,
+.track-copy h1,
+.track-copy span {
+  margin: 0;
+}
+
+.track-copy p,
+.artist-panel small {
+  color: #facc15;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.track-copy h1 {
+  font-size: clamp(2.4rem, 6vw, 5rem);
+  line-height: 0.95;
+}
+
+.track-copy a,
+.artist-panel a {
+  width: fit-content;
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.track-copy a:hover,
+.artist-panel a:hover {
+  color: #facc15;
+}
+
+.track-copy span {
+  color: #a3a3a3;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.button.active {
+  background: #facc15;
+  color: #111111;
+}
+
+.artist-panel {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+}
+
+.artist-panel > span {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  background: #facc15;
+  color: #111111;
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.artist-panel div,
+.comments,
+.comment-list,
+.comments form {
+  display: grid;
+  gap: 12px;
+}
+
+.artist-panel p {
+  margin: 0;
+}
+
+.comments textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 92px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: #0f0f0f;
+  color: #ffffff;
+  padding: 12px 13px;
+  outline: none;
+}
+
+.comments textarea:focus {
+  border-color: #facc15;
+}
+
+.comments form .button {
+  justify-self: start;
+}
+
+.comment-list article {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.comment-avatar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #2f2f2f;
+  color: #facc15;
+  font-weight: 900;
+}
+
+.comment-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.comment-list article div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.comment-list strong {
+  color: #ffffff;
+}
+
+.comment-list small {
+  color: #a3a3a3;
+}
+
+.comment-list p {
+  margin: 0;
+  color: #d4d4d4;
+  line-height: 1.45;
+}
+
+@media (max-width: 720px) {
+  .track-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .cover-art {
+    width: min(100%, 260px);
+  }
+}

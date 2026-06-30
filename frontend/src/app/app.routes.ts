@@ -11,12 +11,14 @@ import { MyPlaylistsPageComponent } from './pages/my-playlists-page/my-playlists
 import { LikedSongsPageComponent } from './pages/liked-songs-page/liked-songs-page.component';
 import { UploadTrackPageComponent } from './pages/upload-track-page/upload-track-page.component';
 import { SettingsPageComponent } from './pages/settings-page/settings-page.component';
+import { TrackDetailsPageComponent } from './pages/track-details-page/track-details-page.component';
 
 export const routes: Routes = [
   { path: '', component: HomePageComponent },
   { path: 'login', component: LoginPageComponent },
   { path: 'register', component: RegisterPageComponent },
   { path: 'artists/:id', component: ArtistDetailsPageComponent },
+  { path: 'tracks/:id', component: TrackDetailsPageComponent },
   { path: 'albums/:id', component: AlbumDetailsPageComponent },
   { path: 'playlists/:id', component: PlaylistDetailsPageComponent },
   { path: 'playlists', component: MyPlaylistsPageComponent, canActivate: [authGuard] },

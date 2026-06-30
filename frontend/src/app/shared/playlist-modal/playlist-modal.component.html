@@ -1,0 +1,57 @@
+@if (track$ | async; as track) {
+  <section class="modal-backdrop" aria-label="Playlist modal">
+    <article class="playlist-modal" role="dialog" aria-modal="true" aria-labelledby="playlist-modal-title">
+      <header>
+        <div>
+          <small>Add to playlist</small>
+          <h2 id="playlist-modal-title">{{ track.title }}</h2>
+        </div>
+        <button type="button" aria-label="Close playlist modal" (click)="modal.close()">
+          <fa-icon [icon]="icons.close" aria-hidden="true"></fa-icon>
+        </button>
+      </header>
+
+      <section>
+        <h3>Existing playlists</h3>
+        @if (loading) {
+          <p class="muted">Loading playlists...</p>
+        } @else if (playlists.length) {
+          <div class="playlist-options">
+            @for (playlist of playlists; track playlist.id) {
+              <button type="button" (click)="addToPlaylist(playlist, track)">
+                <fa-icon [icon]="icons.playlist" aria-hidden="true"></fa-icon>
+                <span>
+                  <strong>{{ playlist.name }}</strong>
+                  <small>{{ playlist.tracks.length }} tracks</small>
+                </span>
+              </button>
+            }
+          </div>
+        } @else {
+          <p class="muted">No playlists yet.</p>
+        }
+      </section>
+
+      <form [formGroup]="form" (ngSubmit)="createAndAdd(track)">
+        <h3>Create playlist</h3>
+        <label>
+          Name
+          <input type="text" formControlName="name" autocomplete="off">
+        </label>
+        <label>
+          Description
+          <textarea rows="3" formControlName="description"></textarea>
+        </label>
+        <label class="check-option">
+          <input type="checkbox" formControlName="isPublic">
+          <span aria-hidden="true"></span>
+          Public playlist
+        </label>
+        <button class="button" type="submit" [disabled]="creating">
+          <fa-icon [icon]="icons.add" aria-hidden="true"></fa-icon>
+          {{ creating ? 'Creating...' : 'Create and add' }}
+        </button>
+      </form>
+    </article>
+  </section>
+}

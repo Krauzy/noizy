@@ -26,7 +26,7 @@ export class LikedSongsPageComponent implements OnInit {
   }
 
   unlike(track: Track): void {
-    this.trackService.unlike(track.id).subscribe(() => this.load());
+    this.trackService.toggleLike(track).subscribe(() => this.load());
   }
 
   private load(): void {

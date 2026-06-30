@@ -12,6 +12,8 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  avatarS3Key?: string | null;
+  avatarUrl?: string | null;
   role: UserRole;
   createdAt: string;
 }
@@ -50,6 +52,7 @@ export interface Track {
   audioS3Key: string;
   coverS3Key?: string | null;
   playCount: number;
+  liked: boolean;
   streamUrl: string;
   createdAt: string;
   updatedAt: string;
@@ -70,4 +73,13 @@ export interface PlaybackHistory {
   id: string;
   track: Track;
   playedAt: string;
+}
+
+export interface TrackComment {
+  id: string;
+  trackId: string;
+  user: User;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
 }
