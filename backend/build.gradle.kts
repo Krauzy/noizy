@@ -43,6 +43,7 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.13")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType<KotlinCompile> {

@@ -1,12 +1,14 @@
 package com.noizy.application.service
 
 import com.noizy.domain.exception.NotFoundException
-import com.noizy.infrastructure.persistence.entity.AlbumEntity
-import com.noizy.infrastructure.persistence.repository.AlbumJpaRepository
-import com.noizy.interfaces.dto.AlbumRequest
-import com.noizy.interfaces.dto.AlbumResponse
-import com.noizy.interfaces.dto.TrackResponse
-import com.noizy.interfaces.mapper.toResponse
+import com.noizy.domain.model.AlbumEntity
+import com.noizy.application.dto.AlbumRequest
+import com.noizy.application.dto.AlbumResponse
+import com.noizy.application.dto.TrackResponse
+import com.noizy.application.mapper.toResponse
+import com.noizy.application.port.input.AlbumUseCase
+import com.noizy.application.port.output.persistence.AlbumRepositoryPort
+import com.noizy.application.port.output.persistence.TrackRepositoryPort
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -15,12 +17,12 @@ import java.util.UUID
 
 @Service
 class AlbumService(
-    private val albums: AlbumJpaRepository,
+    private val albums: AlbumRepositoryPort,
     private val artistService: ArtistService,
-    private val tracks: com.noizy.infrastructure.persistence.repository.TrackJpaRepository
-) {
+    private val tracks: TrackRepositoryPort
+) : AlbumUseCase {
     @Transactional
-    fun create(request: AlbumRequest): AlbumResponse =
+    override fun create(request: AlbumRequest): AlbumResponse =
         albums.save(
             AlbumEntity(
                 title = request.title.trim(),
@@ -31,20 +33,20 @@ class AlbumService(
         ).toResponse()
 
     @Transactional(readOnly = true)
-    fun list(pageable: Pageable): Page<AlbumResponse> =
+    override fun list(pageable: Pageable): Page<AlbumResponse> =
         albums.findAll(pageable).map { it.toResponse() }
 
     @Transactional(readOnly = true)
-    fun get(id: UUID): AlbumResponse = getEntity(id).toResponse()
+    override fun get(id: UUID): AlbumResponse = getEntity(id).toResponse()
 
     @Transactional(readOnly = true)
-    fun tracksForAlbum(id: UUID): List<TrackResponse> {
+    override fun tracksForAlbum(id: UUID): List<TrackResponse> {
         if (!albums.existsById(id)) throw NotFoundException("Album")
         return tracks.findByAlbumId(id).map { it.toResponse() }
     }
 
     @Transactional
-    fun update(id: UUID, request: AlbumRequest): AlbumResponse {
+    override fun update(id: UUID, request: AlbumRequest): AlbumResponse {
         val album = getEntity(id)
         album.title = request.title.trim()
         album.artist = artistService.getEntity(request.artistId)
@@ -54,7 +56,7 @@ class AlbumService(
     }
 
     @Transactional
-    fun delete(id: UUID) {
+    override fun delete(id: UUID) {
         if (!albums.existsById(id)) throw NotFoundException("Album")
         albums.deleteById(id)
     }

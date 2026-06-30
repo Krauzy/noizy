@@ -1,33 +1,33 @@
 package com.noizy.application.service
 
-import com.noizy.domain.event.NoizyEvent
-import com.noizy.domain.event.NoizyEventType
+import com.noizy.domain.event.NoizyEventFactory
 import com.noizy.domain.exception.ConflictException
 import com.noizy.domain.exception.ForbiddenException
 import com.noizy.domain.exception.NotFoundException
-import com.noizy.infrastructure.messaging.EventPublisher
-import com.noizy.infrastructure.persistence.entity.PlaylistEntity
-import com.noizy.infrastructure.persistence.entity.PlaylistTrackEntity
-import com.noizy.infrastructure.persistence.repository.PlaylistJpaRepository
-import com.noizy.infrastructure.persistence.repository.PlaylistTrackJpaRepository
-import com.noizy.infrastructure.persistence.repository.UserJpaRepository
-import com.noizy.interfaces.dto.PlaylistRequest
-import com.noizy.interfaces.dto.PlaylistResponse
-import com.noizy.interfaces.mapper.toResponse
+import com.noizy.domain.model.PlaylistEntity
+import com.noizy.domain.model.PlaylistTrackEntity
+import com.noizy.application.dto.PlaylistRequest
+import com.noizy.application.dto.PlaylistResponse
+import com.noizy.application.mapper.toResponse
+import com.noizy.application.port.input.PlaylistUseCase
+import com.noizy.application.port.output.DomainEventPublisher
+import com.noizy.application.port.output.persistence.PlaylistRepositoryPort
+import com.noizy.application.port.output.persistence.PlaylistTrackRepositoryPort
+import com.noizy.application.port.output.persistence.UserRepositoryPort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
 class PlaylistService(
-    private val playlists: PlaylistJpaRepository,
-    private val playlistTracks: PlaylistTrackJpaRepository,
-    private val users: UserJpaRepository,
+    private val playlists: PlaylistRepositoryPort,
+    private val playlistTracks: PlaylistTrackRepositoryPort,
+    private val users: UserRepositoryPort,
     private val trackService: TrackService,
-    private val eventPublisher: EventPublisher
-) {
+    private val eventPublisher: DomainEventPublisher
+) : PlaylistUseCase {
     @Transactional
-    fun create(request: PlaylistRequest, ownerId: UUID): PlaylistResponse {
+    override fun create(request: PlaylistRequest, ownerId: UUID): PlaylistResponse {
         val owner = users.findById(ownerId).orElseThrow { NotFoundException("User") }
         val playlist = playlists.save(
             PlaylistEntity(
@@ -37,26 +37,20 @@ class PlaylistService(
                 isPublic = request.isPublic
             )
         )
-        eventPublisher.publish(
-            NoizyEvent(
-                type = NoizyEventType.PLAYLIST_CREATED,
-                actorUserId = ownerId,
-                aggregateId = playlist.id
-            )
-        )
+        eventPublisher.publish(NoizyEventFactory.playlistCreated(ownerId, playlist.id))
         return playlist.toResponse(emptyList())
     }
 
     @Transactional(readOnly = true)
-    fun mine(ownerId: UUID): List<PlaylistResponse> =
+    override fun mine(ownerId: UUID): List<PlaylistResponse> =
         playlists.findByOwnerIdOrderByCreatedAtDesc(ownerId).map { it.toResponse(tracksFor(it)) }
 
     @Transactional(readOnly = true)
-    fun publicPlaylists(): List<PlaylistResponse> =
+    override fun publicPlaylists(): List<PlaylistResponse> =
         playlists.findByIsPublicTrueOrderByCreatedAtDesc().map { it.toResponse(tracksFor(it)) }
 
     @Transactional(readOnly = true)
-    fun get(id: UUID, requesterId: UUID?): PlaylistResponse {
+    override fun get(id: UUID, requesterId: UUID?): PlaylistResponse {
         val playlist = getEntity(id)
         if (!playlist.isPublic && playlist.owner.id != requesterId) {
             throw ForbiddenException()
@@ -65,7 +59,7 @@ class PlaylistService(
     }
 
     @Transactional
-    fun update(id: UUID, request: PlaylistRequest, requesterId: UUID): PlaylistResponse {
+    override fun update(id: UUID, request: PlaylistRequest, requesterId: UUID): PlaylistResponse {
         val playlist = getEntity(id)
         ensureOwner(playlist, requesterId)
         playlist.name = request.name.trim()
@@ -75,7 +69,7 @@ class PlaylistService(
     }
 
     @Transactional
-    fun addTrack(id: UUID, trackId: UUID, requesterId: UUID): PlaylistResponse {
+    override fun addTrack(id: UUID, trackId: UUID, requesterId: UUID): PlaylistResponse {
         val playlist = getEntity(id)
         ensureOwner(playlist, requesterId)
         if (playlistTracks.existsByPlaylistIdAndTrackId(id, trackId)) {
@@ -93,7 +87,7 @@ class PlaylistService(
     }
 
     @Transactional
-    fun removeTrack(id: UUID, trackId: UUID, requesterId: UUID): PlaylistResponse {
+    override fun removeTrack(id: UUID, trackId: UUID, requesterId: UUID): PlaylistResponse {
         val playlist = getEntity(id)
         ensureOwner(playlist, requesterId)
         playlistTracks.deleteByPlaylistIdAndTrackId(id, trackId)

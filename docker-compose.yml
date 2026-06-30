@@ -25,6 +25,30 @@ services:
       timeout: 5s
       retries: 5
 
+  redis-insight:
+    image: redis/redisinsight:latest
+    depends_on:
+      - redis
+    ports:
+      - "${REDIS_INSIGHT_HOST_PORT:-5540}:5540"
+    volumes:
+      - noizy-redis-insight-data:/data
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    depends_on:
+      - postgres
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@noizy.dev}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-noizy}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    ports:
+      - "${PGADMIN_HOST_PORT:-5050}:80"
+    volumes:
+      - noizy-pgadmin-data:/var/lib/pgadmin
+      - ./docker/pgadmin/servers.json:/pgadmin4/servers.json:ro
+
   localstack:
     image: localstack/localstack:3.8
     environment:
@@ -89,4 +113,6 @@ services:
 
 volumes:
   noizy-postgres-data:
+  noizy-pgadmin-data:
+  noizy-redis-insight-data:
   noizy-localstack-data:

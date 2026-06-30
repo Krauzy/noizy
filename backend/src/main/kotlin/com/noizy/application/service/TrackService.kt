@@ -1,26 +1,26 @@
 package com.noizy.application.service
 
-import com.noizy.domain.event.NoizyEvent
-import com.noizy.domain.event.NoizyEventType
+import com.noizy.domain.event.NoizyEventFactory
 import com.noizy.domain.exception.BadRequestException
 import com.noizy.domain.exception.NotFoundException
-import com.noizy.infrastructure.aws.S3StorageService
-import com.noizy.infrastructure.messaging.EventPublisher
-import com.noizy.infrastructure.persistence.entity.LikedTrackEntity
-import com.noizy.infrastructure.persistence.entity.PlaybackHistoryEntity
-import com.noizy.infrastructure.persistence.entity.TrackEntity
-import com.noizy.infrastructure.persistence.repository.LikedTrackJpaRepository
-import com.noizy.infrastructure.persistence.repository.PlaybackHistoryJpaRepository
-import com.noizy.infrastructure.persistence.repository.TrackJpaRepository
-import com.noizy.infrastructure.persistence.repository.UserJpaRepository
-import com.noizy.interfaces.dto.PlaybackHistoryResponse
-import com.noizy.interfaces.dto.TrackRequest
-import com.noizy.interfaces.dto.TrackResponse
-import com.noizy.interfaces.dto.TrackCoverResult
-import com.noizy.interfaces.dto.TrackStreamResult
-import com.noizy.interfaces.dto.TrackUpdateRequest
-import com.noizy.interfaces.dto.TrackUploadResponse
-import com.noizy.interfaces.mapper.toResponse
+import com.noizy.domain.model.LikedTrackEntity
+import com.noizy.domain.model.PlaybackHistoryEntity
+import com.noizy.domain.model.TrackEntity
+import com.noizy.application.dto.PlaybackHistoryResponse
+import com.noizy.application.dto.TrackRequest
+import com.noizy.application.dto.TrackResponse
+import com.noizy.application.dto.TrackCoverResult
+import com.noizy.application.dto.TrackStreamResult
+import com.noizy.application.dto.TrackUpdateRequest
+import com.noizy.application.dto.TrackUploadResponse
+import com.noizy.application.mapper.toResponse
+import com.noizy.application.port.input.TrackUseCase
+import com.noizy.application.port.output.DomainEventPublisher
+import com.noizy.application.port.output.TrackStoragePort
+import com.noizy.application.port.output.persistence.LikedTrackRepositoryPort
+import com.noizy.application.port.output.persistence.PlaybackHistoryRepositoryPort
+import com.noizy.application.port.output.persistence.TrackRepositoryPort
+import com.noizy.application.port.output.persistence.UserRepositoryPort
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -30,29 +30,29 @@ import java.util.UUID
 
 @Service
 class TrackService(
-    private val tracks: TrackJpaRepository,
-    private val users: UserJpaRepository,
-    private val likes: LikedTrackJpaRepository,
-    private val history: PlaybackHistoryJpaRepository,
+    private val tracks: TrackRepositoryPort,
+    private val users: UserRepositoryPort,
+    private val likes: LikedTrackRepositoryPort,
+    private val history: PlaybackHistoryRepositoryPort,
     private val artistService: ArtistService,
     private val albumService: AlbumService,
     private val audioMetadata: AudioMetadataService,
-    private val storage: S3StorageService,
-    private val eventPublisher: EventPublisher
-) {
+    private val storage: TrackStoragePort,
+    private val eventPublisher: DomainEventPublisher
+) : TrackUseCase {
     @Transactional(readOnly = true)
-    fun list(pageable: Pageable): Page<TrackResponse> =
+    override fun list(pageable: Pageable): Page<TrackResponse> =
         tracks.findAll(pageable).map { it.toResponse() }
 
     @Transactional(readOnly = true)
-    fun search(query: String, pageable: Pageable): Page<TrackResponse> =
+    override fun search(query: String, pageable: Pageable): Page<TrackResponse> =
         tracks.search(query.trim(), pageable).map { it.toResponse() }
 
     @Transactional(readOnly = true)
-    fun get(id: UUID): TrackResponse = getEntity(id).toResponse()
+    override fun get(id: UUID): TrackResponse = getEntity(id).toResponse()
 
     @Transactional
-    fun create(request: TrackRequest): TrackResponse {
+    override fun create(request: TrackRequest): TrackResponse {
         val track = tracks.save(
             TrackEntity(
                 title = request.title.trim(),
@@ -68,7 +68,7 @@ class TrackService(
     }
 
     @Transactional
-    fun upload(
+    override fun upload(
         title: String,
         albumId: UUID?,
         genre: String?,
@@ -93,19 +93,12 @@ class TrackService(
                 coverS3Key = coverKey
             )
         )
-        eventPublisher.publish(
-            NoizyEvent(
-                type = NoizyEventType.TRACK_UPLOADED,
-                actorUserId = userId,
-                aggregateId = track.id,
-                metadata = mapOf("title" to track.title)
-            )
-        )
+        eventPublisher.publish(NoizyEventFactory.trackUploaded(userId, track.id, track.title))
         return TrackUploadResponse(track.toResponse(), audioKey, coverKey)
     }
 
     @Transactional
-    fun update(id: UUID, request: TrackUpdateRequest): TrackResponse {
+    override fun update(id: UUID, request: TrackUpdateRequest): TrackResponse {
         val track = getEntity(id)
         track.title = request.title.trim()
         track.album = request.albumId?.let { albumService.getEntity(it) }
@@ -116,24 +109,17 @@ class TrackService(
     }
 
     @Transactional
-    fun delete(id: UUID) {
+    override fun delete(id: UUID) {
         if (!tracks.existsById(id)) throw NotFoundException("Track")
         tracks.deleteById(id)
     }
 
     @Transactional
-    fun stream(id: UUID, rangeHeader: String?, userId: UUID?): TrackStreamResult {
+    override fun stream(id: UUID, rangeHeader: String?, userId: UUID?): TrackStreamResult {
         val track = getEntity(id)
         track.playCount += 1
         userId?.let { registerPlaybackInternal(track, it) }
-        eventPublisher.publish(
-            NoizyEvent(
-                type = NoizyEventType.TRACK_PLAYED,
-                actorUserId = userId,
-                aggregateId = track.id,
-                metadata = mapOf("title" to track.title)
-            )
-        )
+        eventPublisher.publish(NoizyEventFactory.trackPlayed(userId, track.id, track.title))
         val s3Stream = storage.getAudio(track.audioS3Key, rangeHeader)
         val contentRange = buildContentRange(rangeHeader, s3Stream.totalLength, s3Stream.returnedLength)
         return TrackStreamResult(
@@ -146,7 +132,7 @@ class TrackService(
     }
 
     @Transactional(readOnly = true)
-    fun cover(id: UUID): TrackCoverResult {
+    override fun cover(id: UUID): TrackCoverResult {
         val track = getEntity(id)
         val key = track.coverS3Key ?: throw NotFoundException("Track cover")
         val image = storage.getImage(key)
@@ -158,26 +144,20 @@ class TrackService(
     }
 
     @Transactional
-    fun registerPlayback(trackId: UUID, userId: UUID): PlaybackHistoryResponse {
+    override fun registerPlayback(trackId: UUID, userId: UUID): PlaybackHistoryResponse {
         val track = getEntity(trackId)
         track.playCount += 1
         val entry = registerPlaybackInternal(track, userId)
-        eventPublisher.publish(
-            NoizyEvent(
-                type = NoizyEventType.TRACK_PLAYED,
-                actorUserId = userId,
-                aggregateId = track.id
-            )
-        )
+        eventPublisher.publish(NoizyEventFactory.trackPlayed(userId, track.id))
         return entry.toResponse()
     }
 
     @Transactional(readOnly = true)
-    fun playbackHistory(userId: UUID): List<PlaybackHistoryResponse> =
+    override fun playbackHistory(userId: UUID): List<PlaybackHistoryResponse> =
         history.findTop50ByUserIdOrderByPlayedAtDesc(userId).map { it.toResponse() }
 
     @Transactional
-    fun like(trackId: UUID, userId: UUID): TrackResponse {
+    override fun like(trackId: UUID, userId: UUID): TrackResponse {
         val track = getEntity(trackId)
         if (!likes.existsByUserIdAndTrackId(userId, trackId)) {
             val user = users.findById(userId).orElseThrow { NotFoundException("User") }
@@ -187,12 +167,12 @@ class TrackService(
     }
 
     @Transactional
-    fun unlike(trackId: UUID, userId: UUID) {
+    override fun unlike(trackId: UUID, userId: UUID) {
         likes.deleteByUserIdAndTrackId(userId, trackId)
     }
 
     @Transactional(readOnly = true)
-    fun liked(userId: UUID): List<TrackResponse> =
+    override fun liked(userId: UUID): List<TrackResponse> =
         likes.findByUserIdOrderByCreatedAtDesc(userId).map { it.track.toResponse() }
 
     fun getEntity(id: UUID): TrackEntity =

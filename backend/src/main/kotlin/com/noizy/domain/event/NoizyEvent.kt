@@ -3,13 +3,6 @@ package com.noizy.domain.event
 import java.time.Instant
 import java.util.UUID
 
-enum class NoizyEventType {
-    TRACK_PLAYED,
-    TRACK_UPLOADED,
-    PLAYLIST_CREATED,
-    USER_REGISTERED
-}
-
 data class NoizyEvent(
     val id: UUID = UUID.randomUUID(),
     val type: NoizyEventType,

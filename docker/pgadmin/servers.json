@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Noizy PostgreSQL",
+      "Group": "Noizy",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "noizy",
+      "Username": "noizy",
+      "SSLMode": "prefer"
+    }
+  }
+}

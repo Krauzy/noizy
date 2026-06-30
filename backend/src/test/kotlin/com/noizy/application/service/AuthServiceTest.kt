@@ -1,11 +1,11 @@
 package com.noizy.application.service
 
-import com.noizy.infrastructure.messaging.EventPublisher
-import com.noizy.infrastructure.persistence.entity.UserEntity
-import com.noizy.infrastructure.persistence.entity.UserRole
-import com.noizy.infrastructure.persistence.repository.UserJpaRepository
-import com.noizy.infrastructure.security.JwtService
-import com.noizy.interfaces.dto.RegisterRequest
+import com.noizy.domain.model.UserEntity
+import com.noizy.domain.model.UserRole
+import com.noizy.application.dto.RegisterRequest
+import com.noizy.application.port.output.DomainEventPublisher
+import com.noizy.application.port.output.TokenProvider
+import com.noizy.application.port.output.persistence.UserRepositoryPort
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -18,10 +18,10 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import java.util.UUID
 
 class AuthServiceTest {
-    private val users = mockk<UserJpaRepository>()
+    private val users = mockk<UserRepositoryPort>()
     private val encoder = mockk<PasswordEncoder>()
-    private val jwt = mockk<JwtService>()
-    private val events = mockk<EventPublisher>()
+    private val jwt = mockk<TokenProvider>()
+    private val events = mockk<DomainEventPublisher>()
     private val service = AuthService(users, encoder, jwt, events)
 
     @Test
